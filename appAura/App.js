@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 
 import SplashScreen from './scr/screens/SplashScreen';
-import PaginaInicial from './scr/screens/paginainicial';
-import HomeScreen from './scr/screens/homeScreen';
-import CarrinhoCompras from './scr/screens/carrinhoCompras';
-import RealizarCadastro from './scr/screens/realizarCadastro';
-import RealizarLogin from './scr/screens/realizarLogin';
+import LoginScreen from './scr/screens/realizarLogin';
+import homeScreen from './scr/screens/homeScreen';
+import carrinhoCompras from './scr/screens/carrinhoCompras';
+import categoria from './scr/screens/categoria';
+import perfil from './scr/screens/perfil';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -20,24 +19,34 @@ function BottomTabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarIcon: ({ color, size }) => {
+        tabBarShowLabel: false,
+        tabBarStyle: styles.tabBar,
+        tabBarIcon: ({ focused }) => {
           let iconName;
-
-          if (route.name === 'Home') iconName = 'home';
-          else if (route.name === 'Inicial') iconName = 'search';
-          else if (route.name === 'Carrinho') iconName = 'cart';
-          else if (route.name === 'Login') iconName = 'person';
-          else if (route.name === 'Cadastro') iconName = 'person-add';
-
-          return <Ionicons name={iconName} size={size} color={color} />;
+          switch (route.name) {
+            case 'Home':
+              iconName = focused ? 'home' : 'home-outline';
+              break;
+            case 'Categoria':
+              iconName = focused ? 'grid' : 'grid-outline';
+              break;
+            case 'Carrinho':
+              iconName = focused ? 'cart' : 'cart-outline';
+              break;
+            case 'Perfil':
+              iconName = focused ? 'person' : 'person-outline';
+              break;
+          }
+          return (
+            <Ionicons name={iconName} size={28} color="#fff" />
+          );
         },
       })}
     >
-      <Tab.Screen name="Inicial" component={PaginaInicial} />
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Carrinho" component={CarrinhoCompras} />
-      <Tab.Screen name="Login" component={RealizarLogin} />
-      <Tab.Screen name="Cadastro" component={RealizarCadastro} />
+      <Tab.Screen name="Home" component={homeScreen} />
+      <Tab.Screen name="Categoria" component={categoria} />
+      <Tab.Screen name="Carrinho" component={carrinhoCompras} />
+      <Tab.Screen name="Perfil" component={perfil} />
     </Tab.Navigator>
   );
 }
@@ -45,7 +54,6 @@ function BottomTabs() {
 export default function App() {
   const [loading, setLoading] = useState(true);
 
-  // Mantém SplashScreen por 2 segundos
   useEffect(() => {
     setTimeout(() => setLoading(false), 2000);
   }, []);
@@ -56,9 +64,28 @@ export default function App() {
         {loading ? (
           <Stack.Screen name="Splash" component={SplashScreen} />
         ) : (
-          <Stack.Screen name="Main" component={BottomTabs} />
+          <Stack.Screen name="Login" component={LoginScreen} />
         )}
+        <Stack.Screen name="Main" component={BottomTabs} />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
+
+const styles = {
+  tabBar: {
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
+    right: 20,
+    elevation: 5,
+    backgroundColor: '#FF69B4',
+    borderRadius: 15,
+    height: 60,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 10,
+    paddingHorizontal: 20,
+  },
+};
