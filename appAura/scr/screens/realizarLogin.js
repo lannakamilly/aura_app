@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Image } from 'react-native';
+import { 
+  View, Text, TextInput, TouchableOpacity, 
+  StyleSheet, KeyboardAvoidingView, Platform, Image, Dimensions 
+} from 'react-native';
+
+const { height } = Dimensions.get('window'); 
+const PRIMARY_COLOR = "#FEA7B5"; 
+const LIGHT_BG = "#FDF6F8"; 
+const GRAY_TEXT = "#707070";
+const DARK_TEXT = "#333333";
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
 
   const handleLogin = () => {
-    // Aqui você pode validar email/senha
-    navigation.replace('Main'); // Vai para a navegação principal
+    navigation.navigate('Main'); // Vai pra tela principal
   };
 
   return (
@@ -15,98 +23,105 @@ export default function LoginScreen({ navigation }) {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      {/* Logo no topo como header, para um design mais amplo e profissional */}
       <Image
-        source={require("../assets/logopng.png")}  // Logo atualizada
-        style={styles.logo}
-        resizeMode="contain"
+        source={{ uri: "https://placehold.co/800x1200/FDF6F8/FEA7B5?text=FUNDO" }} 
+        style={styles.backgroundImage}
+        resizeMode="cover"
       />
-      
-      {/* Título centralizado para iniciar o formulário */}
-      <Text style={styles.title}>Bem-vindo(a)</Text>
-      
-      {/* Inputs com design espaçoso */}
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        keyboardType="email-address"
-        autoCapitalize="none"
-        value={email}
-        onChangeText={setEmail}
-        placeholderTextColor="#d65b8b"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Senha"
-        secureTextEntry
-        value={senha}
-        onChangeText={setSenha}
-        placeholderTextColor="#d65b8b"
-      />
-      
-      {/* Botão proeminente e diferente, full-width para destaque */}
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Entrar</Text>
-      </TouchableOpacity>
-      
-      {/* Texto de cadastro no final, alinhado para um toque inovador */}
-      <Text style={styles.registerText}>Não tem conta ainda? Cadastre-se</Text>
+
+      <View style={styles.topHeader}>
+        <View style={styles.decorationCircle1} />
+        <View style={styles.decorationCircle2} />
+        <Text style={styles.headerTitle}>Bem-vindo(a)</Text>
+      </View>
+
+      <View style={styles.loginCard}>
+        <Text style={styles.title}>Faça Login</Text>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>E-mail</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="seu.email@exemplo.com"
+            value={email}
+            onChangeText={setEmail}
+            placeholderTextColor="#B0B0B0"
+          />
+        </View>
+        
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Senha</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="********"
+            secureTextEntry
+            value={senha}
+            onChangeText={setSenha}
+            placeholderTextColor="#B0B0B0"
+          />
+        </View>
+
+        <TouchableOpacity style={styles.forgotPasswordButton}>
+          <Text style={styles.forgotPasswordText}>Esqueceu a senha?</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <Text style={styles.buttonText}>Entrar</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.registerContainer}>
+        <Text style={styles.registerText}>Não tem uma conta?</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+          <Text style={styles.signUpText}>Cadastre-se</Text>
+        </TouchableOpacity>
+      </View>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',  // Centraliza verticalmente para um layout amplo
-    alignItems: 'center',      // Centraliza horizontalmente
-    backgroundColor: '#fff',   // Fundo branco para um design clean e profissional
-    padding: 40,               // Mais padding para um ar espaçoso e moderno
-  },
-  logo: {
-    width: 200,                // Tamanho maior para destaque no topo
-    height: 200,
-    marginBottom: 50,          // Espaçamento maior para separar do conteúdo principal
-    borderRadius: 15,          // Borda arredondada sutil para um look diferente e premium
-  },
-  title: {
-    fontSize: 36,              // Fonte maior e mais impactante para um design profissional
-    fontWeight: 'bold',
-    color: '#d65b8b',          // Cor principal para destaque
-    textAlign: 'center',
-    marginBottom: 40,          // Espaçamento generoso para fluxo visual
-    width: '80%',              // Largura ajustada para não ocupar toda a tela, criando simetria
-  },
-  input: {
-    width: '80%',              // Largura menor que full para um design mais focado e diferente
-    height: 65,                // Altura maior para um ar premium
-    borderWidth: 2,
-    borderColor: '#d65b8b',    // Cor principal para bordas elegantes
-    borderRadius: 20,          // Bordas mais arredondadas para inovação
-    paddingHorizontal: 25,
-    marginBottom: 25,          // Mais espaço entre inputs
-    fontSize: 18,
-    backgroundColor: '#f9f9f9',// Fundo leve para contraste, mantendo plano
-  },
-  button: {
-    width: '80%',              // Mesma largura dos inputs para consistência e design coeso
-    height: 65,
-    backgroundColor: '#d65b8b',// Cor principal para o botão
-    borderRadius: 20,          // Bordas arredondadas para um toque moderno
+  container: { flex: 1, backgroundColor: LIGHT_BG },
+  backgroundImage: { ...StyleSheet.absoluteFillObject, opacity: 0.2 },
+  topHeader: {
+    height: height * 0.35,
+    backgroundColor: PRIMARY_COLOR,
+    borderBottomLeftRadius: 50,
+    borderBottomRightRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 30,          // Espaçamento para separar do texto de cadastro
+    overflow: 'hidden',
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 22,              // Fonte maior para destaque
-    fontWeight: 'bold',
+  headerTitle: { fontSize: 32, fontWeight: '900', color: '#fff' },
+  decorationCircle1: {
+    position: 'absolute', width: 150, height: 150, borderRadius: 75,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)', top: -50, left: -50,
   },
-  registerText: {
-    color: '#d65b8b',
-    fontSize: 18,
-    textAlign: 'center',
-    textDecorationLine: 'underline',
-    marginTop: 20,             // Espaçamento para posicionar no final da tela
+  decorationCircle2: {
+    position: 'absolute', width: 80, height: 80, borderRadius: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)', bottom: 20, right: 40,
   },
+  loginCard: {
+    width: '90%', backgroundColor: '#fff', borderRadius: 30,
+    paddingHorizontal: 30, paddingVertical: 40, alignSelf: 'center',
+    marginTop: -80, shadowColor: PRIMARY_COLOR, shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.3, shadowRadius: 25, elevation: 25,
+  },
+  title: { fontSize: 28, fontWeight: '800', color: DARK_TEXT, marginBottom: 35 },
+  inputContainer: { marginBottom: 25 },
+  label: { fontSize: 14, color: DARK_TEXT, fontWeight: '700', marginBottom: 8 },
+  input: {
+    width: '100%', height: 55, backgroundColor: '#fff', borderRadius: 15,
+    paddingHorizontal: 15, fontSize: 16, borderWidth: 1, borderColor: '#E0E0E0',
+  },
+  forgotPasswordButton: { alignSelf: 'flex-end', marginBottom: 35 },
+  forgotPasswordText: { color: PRIMARY_COLOR, fontSize: 14, fontWeight: '600' },
+  button: {
+    width: '100%', height: 55, backgroundColor: PRIMARY_COLOR, borderRadius: 15,
+    justifyContent: 'center', alignItems: 'center', elevation: 10,
+  },
+  buttonText: { color: '#fff', fontSize: 18, fontWeight: '700' },
+  registerContainer: { flexDirection: 'row', justifyContent: 'center', marginTop: 20 },
+  registerText: { color: GRAY_TEXT, fontSize: 16 },
+  signUpText: { color: PRIMARY_COLOR, fontSize: 16, fontWeight: '700', marginLeft: 5 },
 });

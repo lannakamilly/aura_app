@@ -22,28 +22,28 @@ const LIGHT_BG = "#fff"; // Fundo Principal Branco
 // --- DADOS MOCK (Simulando o conteúdo do App de Moda Feminina) ---
 
 // Dados para os filtros (All, Popular, Recent, Recommend)
-const tabs = ["All", "Popular", "Recent", "Recommend"];
+const tabs = ["Todos", "Popular", "Recente", "Recomendado"];
 
 // Dados para o CARROSSEL DE PROMOÇÕES
 const promotionBanners = [
   {
     id: 1,
-    title: "Big Sale",
-    subtitle: "Get the trendy fashion at a discount of up to 50%",
+    title: "banner 1",
+    subtitle: "descrição",
     // Imagem com fundo rosa, como no design original
-    backgroundImage: "https://placehold.co/400x150/FEA7B5/fff?text=MEGA+PROMO%C3%87%C3%83O", 
+    backgroundImage: "https://i.pinimg.com/736x/29/94/01/2994016a94dab0b264b07adab2cc8bb3.jpg", 
   },
   {
     id: 2,
-    title: "New Arrivals",
-    subtitle: "Discover the new summer collection!",
-    backgroundImage: "https://placehold.co/400x150/FFC9D2/000?text=NOVIDADES", 
+    title: "banner 2",
+    subtitle: "descrição",
+    backgroundImage: "https://i.pinimg.com/1200x/84/b4/17/84b4170c663720656a2bea411cd67061.jpg", 
   },
   {
     id: 3,
-    title: "Free Shipping",
-    subtitle: "On orders over $99.",
-    backgroundImage: "https://placehold.co/400x150/D1B1C2/fff?text=FRETE+GRATIS", 
+    title: "banner 3",
+    subtitle: "descrição",
+    backgroundImage: "https://i.pinimg.com/736x/bb/64/82/bb648291228c883a246d8d90567b9264.jpg", 
   },
 ];
 
@@ -53,25 +53,25 @@ const products = [
     id: 2,
     name: "Casual V-neck",
     price: "$129.00",
-    imageUrl: "https://placehold.co/200x200/F0F0F0/000?text=Camiseta+V",
+    imageUrl: "https://cdn.awsli.com.br/2500x2500/591/591914/produto/299116739/-08---cido-l-tico-reduzido-y8by7yd7ud.png",
   },
   {
     id: 3,
     name: "Casual T-Shirt",
     price: "$113.00",
-    imageUrl: "https://placehold.co/200x200/F0F0F0/000?text=Camiseta",
+    imageUrl: "https://acdn-us.mitiendanube.com/stores/004/599/657/products/frutas-4a762a9858af81d12117272424982864-640-0.png",
   },
   {
     id: 4,
     name: "High-Waist Jeans",
     price: "$199.00",
-    imageUrl: "https://placehold.co/200x200/F0F0F0/000?text=Jeans",
+    imageUrl: "https://acdn-us.mitiendanube.com/stores/004/599/657/products/leite-de-amendoas-ac405a9541ac122f4117276692711299-1024-1024.png",
   },
   {
     id: 5,
     name: "Mineral Primer",
     price: "$44.90",
-    imageUrl: "https://placehold.co/200x200/F0F0F0/000?text=Primer", // Imagem do produto de maquiagem
+    imageUrl: "https://cdn.awsli.com.br/2500x2500/591/591914/produto/299107588/-06---cido-glic-lico-qiils1zk14.png", // Imagem do produto de maquiagem
   },
 ];
 
