@@ -15,21 +15,21 @@ const categories = [
     name: 'Cabelo', 
     description: 'Shampoos, condicionadores e tratamentos',
     // OBS: Em um app real, você importaria ou usaria URIs de imagens
-    image: require('..assets/images/cabelo-categoria.jpg'), // Emoji como placeholder para a imagem
+    image: require('../assets/banner.jpeg'), // Emoji como placeholder para a imagem
     imageBgColor: '#FDF0F0', // Fundo levemente rosa para a imagem
   },
   { 
     id: '2', 
     name: 'Pele', 
     description: 'Cuidados faciais e corporais',
-    image: require('..assets/images/pele-categoria.jpg'), 
+    image: require('../assets/cabelo-categoria.jpg'), 
     imageBgColor: '#F0FDF5', // Fundo levemente verde/claro
   },
   { 
     id: '3', 
     name: 'Maquiagem', 
     description: 'Bases, batons e pincéis',
-    image: require('..assets/images/maquiag-categoria.jpg'), 
+    image: require('../assets/cabelo-categoria.jpg'), 
     imageBgColor: '#F0F8FD', // Fundo levemente azul/claro
   },
   // Adicione mais categorias se desejar...
