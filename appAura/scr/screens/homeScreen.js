@@ -15,7 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 const { width } = Dimensions.get('window');
 // Definição da largura do banner para FlatList
 const BANNER_WIDTH = width - 40; 
-const MAIN_PINK = "#FEA7B5"; // Rosa Principal Suave
+const MAIN_PINK = "#ff86b5"; // Rosa Principal Suave
 const LIGHT_PINK = "#FDEFF1"; // Rosa muito claro para fundo de topo
 const LIGHT_BG = "#fff"; // Fundo Principal Branco
 
@@ -35,7 +35,7 @@ const promotionBanners = [
   },
   {
     id: 2,
-    title: "banner 2",
+    title: "banner 1",
     subtitle: "descrição",
     backgroundImage: "https://i.pinimg.com/1200x/84/b4/17/84b4170c663720656a2bea411cd67061.jpg", 
   },
