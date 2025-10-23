@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { 
-  View, Text, TextInput, TouchableOpacity, 
-  StyleSheet, KeyboardAvoidingView, Platform, Image, Dimensions 
+import {
+  View, Text, TextInput, TouchableOpacity,
+  StyleSheet, KeyboardAvoidingView, Platform, Image, Dimensions
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient'; // Importar LinearGradient
 
-const { height } = Dimensions.get('window'); 
+const { height } = Dimensions.get('window');
 const PRIMARY_COLOR_LIGHT = "#FFADD6"; // Rosa mais claro para gradiente
-const PRIMARY_COLOR_DARK = "#fdcadeff"; // Rosa vibrante para gradiente
-const LIGHT_BG = "#FDF6F8"; 
+const PRIMARY_COLOR_DARK = "#feb3d1ff"; // Rosa vibrante para gradiente
+const LIGHT_BG = "#FDF6F8";
 const GRAY_TEXT = "#707070";
 const DARK_TEXT = "#333333";
 
@@ -27,7 +27,7 @@ export default function LoginScreen({ navigation }) {
     >
       {/* Imagem de fundo sutil - manter ou remover conforme preferência */}
       <Image
-        source={{ uri: "https://placehold.co/800x1200/FDF6F8/FEA7B5?text=FUNDO" }} 
+        source={{ uri: "https://placehold.co/800x1200/FDF6F8/FEA7B5?text=FUNDO" }}
         style={styles.backgroundImage}
         resizeMode="cover"
       />
@@ -62,7 +62,7 @@ export default function LoginScreen({ navigation }) {
             autoCapitalize="none"
           />
         </View>
-        
+
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Senha</Text>
           <TextInput
@@ -86,7 +86,7 @@ export default function LoginScreen({ navigation }) {
 
       <View style={styles.registerContainer}>
         <Text style={styles.registerText}>Não tem uma conta?</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Cadastro')}> 
+        <TouchableOpacity onPress={() => navigation.navigate('Cadastro')}>
           <Text style={styles.signUpText}>Cadastre-se</Text>
         </TouchableOpacity>
       </View>
@@ -115,13 +115,21 @@ const styles = StyleSheet.create({
     height: 120,
     marginBottom: 10,
   },
-  headerTitle: { fontSize: 32, fontWeight: '900', color: '#fff', textShadowColor: 'rgba(0,0,0,0.15)', textShadowOffset: {width: 1, height: 1}, textShadowRadius: 2 },
-  
+  headerTitle: { 
+    fontSize: 32, 
+    fontWeight: '900', 
+    color: '#fff', 
+    textShadowColor: 'rgba(0,0,0,0.15)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+    marginBottom: 40,
+  },
+
   loginCard: {
     width: '90%', backgroundColor: '#fff', borderRadius: 30,
     paddingHorizontal: 30, paddingVertical: 40, alignSelf: 'center',
     marginTop: -80, // Subir o card para sobrepor o header
-    shadowColor: PRIMARY_COLOR_DARK, 
+    shadowColor: PRIMARY_COLOR_DARK,
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.3, shadowRadius: 25, elevation: 25,
   },

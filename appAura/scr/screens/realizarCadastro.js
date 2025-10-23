@@ -8,7 +8,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 const { height } = Dimensions.get('window'); 
 // Definindo cores consistentes
 const PRIMARY_COLOR_LIGHT = "#FFADD6"; 
-const PRIMARY_COLOR_DARK = "#ff86b5"; 
+const PRIMARY_COLOR_DARK = "#f89dc0ff"; 
 const LIGHT_BG = "#FDF6F8"; 
 const GRAY_TEXT = "#707070";
 const DARK_TEXT = "#333333";
@@ -185,7 +185,8 @@ const styles = StyleSheet.create({
     color: '#fff', 
     textShadowColor: 'rgba(0,0,0,0.15)', 
     textShadowOffset: {width: 1, height: 1}, 
-    textShadowRadius: 2 
+    textShadowRadius: 2,
+    marginBottom: 40,
   },
   
   // Card de Formulário (Login/Cadastro)
