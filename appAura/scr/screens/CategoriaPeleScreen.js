@@ -28,7 +28,7 @@ const products = [
     originalPrice: 'R$159,90',
     price: 'R$129,90',
     rating: 4.8,
-    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:eco,w_210,h_210/v1/imagens/products/B47602/BotiSun_Antissinais_FPS70_40ml_B47602.jpg',
+    imageUrl: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.belezanaweb.com.br%2Fkit-adcos-de-tratamento-facial-para-pele-oleosa-3-produtos%2F&psig=AOvVaw0zghSHVOZIFeyGjVB9AHHP&ust=1761303687569000&source=images&cd=vfe&opi=89978449&ved=2ahUKEwi7g7HWlbqQAxULjGEGHXn7BHwQjRx6BAgAEBo',
     isFavorite: true,
   },
   {
@@ -37,7 +37,7 @@ const products = [
     originalPrice: 'R$45,00',
     price: 'R$36,96',
     rating: 4.5,
-    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6yWIHpMq770pdrh9psx0InwMh0_AtMpgGDw&s',
+    imageUrl: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.belezanaweb.com.br%2Fkit-adcos-pele-fresca-e-saudavel-2-3-produtos%2F&psig=AOvVaw2zpWJ4kvm9SUT3oZEql3f2&ust=1761303703547000&source=images&cd=vfe&opi=89978449&ved=2ahUKEwjmnYDelbqQAxWIOLkGHYg6F6EQjRx6BAgAEBo',
     isFavorite: false,
   },
   {
@@ -46,7 +46,7 @@ const products = [
     originalPrice: 'R$99,90',
     price: 'R$79,90',
     rating: 4.9,
-    imageUrl: 'https://images.tcdn.com.br/img/img_prod/656618/rhenuks_skin_care_kit_facial_anti_rugas_uso_diario_4_produtos_3631_1_006b20ce410fe456ca32766e16693ede.jpg',
+    imageUrl: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.belezanaweb.com.br%2Fkit-adcos-aqua-fluid-fps50-vitamina-c-15-2-produtos%2F&psig=AOvVaw0zIJR0gHUKPKX_55hpIn_e&ust=1761303731371000&source=images&cd=vfe&opi=89978449&ved=2ahUKEwjZuqLrlbqQAxV2N7kGHVKuFZsQjRx6BAgAEBo',
     isFavorite: true,
   },
   {
@@ -55,7 +55,7 @@ const products = [
     originalPrice: 'R$30,00',
     price: 'R$22,20',
     rating: 4.2,
-    imageUrl: 'https://boticaalternativa.com.br/wp-content/uploads/2023/02/kit-altermax-skincare.png',
+    imageUrl: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.belezanawebpro.com.br%2Fkit-adcos-pele-fresca-e-saudavel-2-3-produtos%2F&psig=AOvVaw1-rAGYqOIcREoI4PLdb9Oe&ust=1761303753564000&source=images&cd=vfe&opi=89978449&ved=2ahUKEwinhO31lbqQAxXmObkGHSXyCDoQjRx6BAgAEBo',
     isFavorite: false,
   },
   // Mais produtos para simular a rolagem
@@ -65,7 +65,7 @@ const products = [
     originalPrice: 'R$55,00',
     price: 'R$45,00',
     rating: 4.6,
-    imageUrl: 'https://blog.havan.com.br/wp-content/uploads/2023/06/produtos-de-skincare-sabonete-liquido-facial-150ml-vult-1.webp',
+    imageUrl: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.belezanaweb.com.br%2Fkit-adcos-aqua-fluid-fps50-vitamina-c-15-2-produtos%2F&psig=AOvVaw0zIJR0gHUKPKX_55hpIn_e&ust=1761303731371000&source=images&cd=vfe&opi=89978449&ved=2ahUKEwjZuqLrlbqQAxV2N7kGHVKuFZsQjRx6BAgAEBo',
     isFavorite: false,
   },
   {
@@ -74,7 +74,7 @@ const products = [
     originalPrice: 'R$65,00',
     price: 'R$59,99',
     rating: 4.7,
-    imageUrl: 'https://cdn.awsli.com.br/2500x2500/764/764220/produto/212436014e35b9bc648.jpg',
+    imageUrl: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.belezanawebpro.com.br%2Fkit-adcos-essenciais-1-3-produtos%2F&psig=AOvVaw0zIJR0gHUKPKX_55hpIn_e&ust=1761303731371000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCICky9CXupADFQAAAAAdAAAAABAD',
     isFavorite: true,
   },
 ];

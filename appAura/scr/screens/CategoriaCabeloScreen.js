@@ -28,7 +28,7 @@ const products = [
     originalPrice: 'R$159,90',
     price: 'R$129,90',
     rating: 4.8,
-    imageUrl: 'https://i.pinimg.com/736x/62/2c/39/622c391cc89b333242f0c96a72ca4af4.jpg',
+    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:eco,w_800/v1/imagens/product/MP8791/ccda83b0-71e1-4179-87fd-1c2fa65dd69b-kit-anti-frizz-completo-5-produtos.png',
     isFavorite: true,
   },
   {
@@ -37,7 +37,7 @@ const products = [
     originalPrice: 'R$45,00',
     price: 'R$36,96',
     rating: 4.5,
-    imageUrl: 'https://i.pinimg.com/736x/ff/ee/53/ffee53ca6a7d0ecdc28c8b1236e55465.jpg',
+    imageUrl: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.belezanaweb.com.br%2Fkit-beleza-na-web-pele-e-cabelo-4-produtos%2F&psig=AOvVaw0e9QcoUaHhP530n1iG3bRs&ust=1761303548175000&source=images&cd=vfe&opi=89978449&ved=2ahUKEwiAivWTlbqQAxUUBrkGHbf-AxcQjRx6BAgAEBo',
     isFavorite: false,
   },
   {
@@ -46,7 +46,7 @@ const products = [
     originalPrice: 'R$99,90',
     price: 'R$79,90',
     rating: 4.9,
-    imageUrl: 'https://i.pinimg.com/1200x/5b/26/ea/5b26eaf686ad3873a77fe5f7a36a1974.jpg',
+    imageUrl: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.belezanaweb.com.br%2Fkit-beleza-na-web-pele-e-cabelo-6-produtos%2F&psig=AOvVaw3ZBvZNGJ-eDS9Y1pQehZXC&ust=1761303579999000&source=images&cd=vfe&opi=89978449&ved=2ahUKEwjPuIujlbqQAxWuN7kGHVcLDt8QjRx6BAgAEBo',
     isFavorite: true,
   },
   {
@@ -55,7 +55,7 @@ const products = [
     originalPrice: 'R$30,00',
     price: 'R$22,20',
     rating: 4.2,
-    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:eco,w_800/v1/imagens/product/32878/1f26037b-577d-4db7-89d7-cbca9cbcf5a6-lola-cosmetics-rapunzel-milk-spray-leave-in-230ml.png',
+    imageUrl: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.casasbahia.com.br%2Fkit-beleza-na-web-pele-cabelo-3-produtos%2Fp%2F1557265984&psig=AOvVaw23pUb4d5IIxDdCfU5v0egI&ust=1761303598920000&source=images&cd=vfe&opi=89978449&ved=2ahUKEwi7po6slbqQAxVON7kGHWVxGG4QjRx6BAgAEBo',
     isFavorite: false,
   },
   // Mais produtos para simular a rolagem
@@ -65,7 +65,7 @@ const products = [
     originalPrice: 'R$55,00',
     price: 'R$45,00',
     rating: 4.6,
-    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:eco,w_1800,c_limit/e_trim/v1/imagens/product/KT004284/492587a7-9e2f-45a9-98b5-76a2637090ce-kit-truss-ultra-hydration-plus-specific-uso-obrigatorio-intense-4-produtos.png',
+    imageUrl: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.casasbahia.com.br%2Fkit-beleza-na-web-pele-cabelo-3-produtos%2Fp%2F1557265984&psig=AOvVaw23pUb4d5IIxDdCfU5v0egI&ust=1761303598920000&source=images&cd=vfe&opi=89978449&ved=2ahUKEwi7po6slbqQAxVON7kGHWVxGG4QjRx6BAgAEBo',
     isFavorite: false,
   },
   {
@@ -74,7 +74,7 @@ const products = [
     originalPrice: 'R$65,00',
     price: 'R$59,99',
     rating: 4.7,
-    imageUrl: 'https://cdn.awsli.com.br/613/613406/produto/272360196/226f4682f908c57bb96c688bd05c7f72-uoazqhzhxj.JPG',
+    imageUrl: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.belezanaweb.com.br%2Fkit-beleza-na-web-pele-e-cabelo-4-produtos%2F&psig=AOvVaw0e9QcoUaHhP530n1iG3bRs&ust=1761303548175000&source=images&cd=vfe&opi=89978449&ved=2ahUKEwiAivWTlbqQAxUUBrkGHbf-AxcQjRx6BAgAEBo',
     isFavorite: true,
   },
 ];
