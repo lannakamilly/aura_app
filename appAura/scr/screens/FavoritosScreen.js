@@ -93,7 +93,7 @@ export default function FavoritosScreen({ navigation }) {
   const handleBuyPress = (item) => {
     console.log(`Produto ${item.name} adicionado ao carrinho.`);
     // Ação principal solicitada: Navegar para o carrinho
-    navigation.navigate('Carrinho'); 
+    navigation.navigate('carrinhoCompras'); 
   };
 
   // Função para simular a remoção de um item
