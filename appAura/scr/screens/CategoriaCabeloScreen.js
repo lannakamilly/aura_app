@@ -46,7 +46,7 @@ const products = [
     originalPrice: 'R$99,90',
     price: 'R$79,90',
     rating: 4.9,
-    imageUrl: 'https://imgs.casasbahia.com.br/1557265984/1xg.jpg?imwidth=1000',
+    imageUrl: 'https://www.loreal-paris.com.br/-/media/project/loreal/brand-sites/oap/americas/br/products/hair/hair-care/elseve/hidra-hialuronico/novosassets/creme-de-tratamento/imagem-creme-de-tratamento-300g-packshot.png',
     isFavorite: true,
   },
   {
@@ -177,12 +177,12 @@ const CategoryProductsScreen = () => {
         
         {/* Barra de Navegação/Ações no Topo */}
         <View style={styles.heroHeader}>
-          <TouchableOpacity style={styles.iconButton}>
+          {/* <TouchableOpacity style={styles.iconButton}>
             <Ionicons name="arrow-back" size={24} color="#333" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton}>
             <Ionicons name="search" size={24} color="#333" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         {/* Título da Categoria */}

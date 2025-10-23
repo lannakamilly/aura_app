@@ -55,7 +55,7 @@ const products = [
     originalPrice: 'R$30,00',
     price: 'R$22,20',
     rating: 4.2,
-    imageUrl: 'https://images.unsplash.com/photo-1621600371974-9548483b8b17?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:eco,w_800/v1/imagens/product/32878/1f26037b-577d-4db7-89d7-cbca9cbcf5a6-lola-cosmetics-rapunzel-milk-spray-leave-in-230ml.png',
     isFavorite: false,
   },
   // Mais produtos para simular a rolagem
@@ -177,12 +177,12 @@ const CategoryProductsScreen = () => {
         
         {/* Barra de Navegação/Ações no Topo */}
         <View style={styles.heroHeader}>
-          <TouchableOpacity style={styles.iconButton}>
+          {/* <TouchableOpacity style={styles.iconButton}>
             <Ionicons name="arrow-back" size={24} color="#333" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton}>
             <Ionicons name="search" size={24} color="#333" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         {/* Título da Categoria */}

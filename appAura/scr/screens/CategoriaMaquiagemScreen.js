@@ -177,12 +177,12 @@ const CategoryProductsScreen = () => {
         
         {/* Barra de Navegação/Ações no Topo */}
         <View style={styles.heroHeader}>
-          <TouchableOpacity style={styles.iconButton}>
+          {/* <TouchableOpacity style={styles.iconButton}>
             <Ionicons name="arrow-back" size={24} color="#333" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton}>
             <Ionicons name="search" size={24} color="#333" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         {/* Título da Categoria */}
