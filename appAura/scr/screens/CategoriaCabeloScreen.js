@@ -28,7 +28,7 @@ const products = [
     originalPrice: 'R$159,90',
     price: 'R$129,90',
     rating: 4.8,
-    imageUrl: 'https://i.pinimg.com/736x/62/2c/39/622c391cc89b333242f0c96a72ca4af4.jpg',
+    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:eco,w_800/v1/imagens/product/MP8791/ccda83b0-71e1-4179-87fd-1c2fa65dd69b-kit-anti-frizz-completo-5-produtos.png',
     isFavorite: true,
   },
   {
@@ -37,7 +37,7 @@ const products = [
     originalPrice: 'R$45,00',
     price: 'R$36,96',
     rating: 4.5,
-    imageUrl: 'https://i.pinimg.com/736x/ff/ee/53/ffee53ca6a7d0ecdc28c8b1236e55465.jpg',
+    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:eco,w_1800,c_limit/e_trim/v1/imagens/product/KT001996/97821b67-49fa-46c2-9f23-271d27624134-kit-beleza-na-web-pele-e-cabelo-4-produtos.png',
     isFavorite: false,
   },
   {
@@ -46,7 +46,7 @@ const products = [
     originalPrice: 'R$99,90',
     price: 'R$79,90',
     rating: 4.9,
-    imageUrl: 'https://i.pinimg.com/1200x/5b/26/ea/5b26eaf686ad3873a77fe5f7a36a1974.jpg',
+    imageUrl: 'https://imgs.casasbahia.com.br/1557265984/1xg.jpg?imwidth=1000',
     isFavorite: true,
   },
   {
@@ -55,7 +55,7 @@ const products = [
     originalPrice: 'R$30,00',
     price: 'R$22,20',
     rating: 4.2,
-    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:eco,w_800/v1/imagens/product/32878/1f26037b-577d-4db7-89d7-cbca9cbcf5a6-lola-cosmetics-rapunzel-milk-spray-leave-in-230ml.png',
+    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:eco,w_800/v1/imagens/product/KT005072/aef72423-ff19-4887-9599-d8c9cebe0ba9-kit-beleza-na-web-rosto-corpo-e-cabelo-2-produtos.png',
     isFavorite: false,
   },
   // Mais produtos para simular a rolagem
@@ -65,7 +65,7 @@ const products = [
     originalPrice: 'R$55,00',
     price: 'R$45,00',
     rating: 4.6,
-    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:eco,w_1800,c_limit/e_trim/v1/imagens/product/KT004284/492587a7-9e2f-45a9-98b5-76a2637090ce-kit-truss-ultra-hydration-plus-specific-uso-obrigatorio-intense-4-produtos.png',
+    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:best/v1/imagens/product/20057140/56ed4434-c20d-49a0-985b-8ad84ad8f39c-vichy-dercos-energy-shampoo-estimulante-400g.png',
     isFavorite: false,
   },
   {
@@ -74,7 +74,7 @@ const products = [
     originalPrice: 'R$65,00',
     price: 'R$59,99',
     rating: 4.7,
-    imageUrl: 'https://cdn.awsli.com.br/613/613406/produto/272360196/226f4682f908c57bb96c688bd05c7f72-uoazqhzhxj.JPG',
+    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:eco,w_1800,c_limit/e_trim/v1/imagens/product/KT001995/d6208853-ab54-426b-a9fd-fd0f9f88681c-kit-beleza-na-web-pele-e-cabelo-6-produtos.png',
     isFavorite: true,
   },
 ];

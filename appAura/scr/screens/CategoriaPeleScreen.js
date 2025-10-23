@@ -28,7 +28,7 @@ const products = [
     originalPrice: 'R$159,90',
     price: 'R$129,90',
     rating: 4.8,
-    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:eco,w_210,h_210/v1/imagens/products/B47602/BotiSun_Antissinais_FPS70_40ml_B47602.jpg',
+    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:eco,w_800/v1/imagens/product/KT001951/f1ff084d-71bd-4394-a1a3-e9fc2a7c12af-kit-adcos-pele-fresca-e-saudavel-1-3-produtos.png',
     isFavorite: true,
   },
   {
@@ -37,7 +37,7 @@ const products = [
     originalPrice: 'R$45,00',
     price: 'R$36,96',
     rating: 4.5,
-    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6yWIHpMq770pdrh9psx0InwMh0_AtMpgGDw&s',
+    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:best/v1/imagens/products/73117/73117_c.png',
     isFavorite: false,
   },
   {
@@ -46,7 +46,7 @@ const products = [
     originalPrice: 'R$99,90',
     price: 'R$79,90',
     rating: 4.9,
-    imageUrl: 'https://images.tcdn.com.br/img/img_prod/656618/rhenuks_skin_care_kit_facial_anti_rugas_uso_diario_4_produtos_3631_1_006b20ce410fe456ca32766e16693ede.jpg',
+    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:eco,w_800/v1/imagens/product/KT001959/b36366a2-922e-43a5-9c10-d2af9149ef49-kit-adcos-de-tratamento-facial-para-pele-oleosa-3-produtos.png',
     isFavorite: true,
   },
   {
@@ -55,7 +55,7 @@ const products = [
     originalPrice: 'R$30,00',
     price: 'R$22,20',
     rating: 4.2,
-    imageUrl: 'https://boticaalternativa.com.br/wp-content/uploads/2023/02/kit-altermax-skincare.png',
+    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:eco,w_800/v1/imagens/product/80708/6078622c-e700-45ad-b1e2-d055d1784c49-80708-pai-67426-67433.png',
     isFavorite: false,
   },
   // Mais produtos para simular a rolagem
@@ -65,7 +65,7 @@ const products = [
     originalPrice: 'R$55,00',
     price: 'R$45,00',
     rating: 4.6,
-    imageUrl: 'https://blog.havan.com.br/wp-content/uploads/2023/06/produtos-de-skincare-sabonete-liquido-facial-150ml-vult-1.webp',
+    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:best/v1/imagens/products/20044545/20044545_a.png',
     isFavorite: false,
   },
   {
@@ -74,7 +74,7 @@ const products = [
     originalPrice: 'R$65,00',
     price: 'R$59,99',
     rating: 4.7,
-    imageUrl: 'https://cdn.awsli.com.br/2500x2500/764/764220/produto/212436014e35b9bc648.jpg',
+    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:best/v1/imagens/product/75051/d2a75134-7cc1-484c-9407-47eff91bc846-adcos-aqua-hidratacao-intensiva-serum-30ml.png',
     isFavorite: true,
   },
 ];

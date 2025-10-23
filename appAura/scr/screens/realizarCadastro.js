@@ -124,7 +124,7 @@ export default function RegisterScreen({ navigation }) {
         >
           {/* Seu Logo aqui */}
           <Image
-            source={require('../../assets/logopng.png')} // Substitua pelo caminho do seu logo
+            source={require('../assets/logopng.png')} // Substitua pelo caminho do seu logo
             style={styles.logo}
             resizeMode="contain"
           />
