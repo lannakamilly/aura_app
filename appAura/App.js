@@ -13,6 +13,7 @@ import carrinhoCompras from './scr/screens/carrinhoCompras';
 import categoria from './scr/screens/categoria';
 import perfil from './scr/screens/perfil';
 import Pagamento from './scr/screens/metodopagamento';
+import Cadastro from './scr/screens/realizarCadastro';
 
 // NOVAS TELAS DE PRODUTO ADICIONADAS AQUI
 import Produto from './scr/screens/produto';
@@ -71,7 +72,6 @@ function BottomTabs() {
               iconName = 'help-circle-outline';
           }
 
-          // Estilizando o ícone: Círculo flutuante quando focado
           return (
             <View style={focused ? styles.iconContainerActive : styles.iconContainerInactive}>
               <Ionicons
@@ -83,7 +83,6 @@ function BottomTabs() {
           );
         },
 
-        // Cor do rótulo
         tabBarActiveTintColor: PRIMARY_PINK,
         tabBarInactiveTintColor: ICON_INACTIVE_COLOR,
       })}
@@ -100,7 +99,6 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Definindo o tempo de splash screen
     setTimeout(() => setLoading(false), 2000);
   }, []);
 
@@ -112,14 +110,16 @@ export default function App() {
         ) : (
           <Stack.Screen name="Login" component={LoginScreen} />
         )}
-        
+
+        {/* 🔥 Adicionando Cadastro pra funcionar certinho */}
+        <Stack.Screen name="Cadastro" component={Cadastro} />
+
         {/* Rotas Principais */}
         <Stack.Screen name="Main" component={BottomTabs} />
         <Stack.Screen name="Pagamento" component={Pagamento} />
 
         {/* =================================================== */}
         {/* ROTAS NOVAS SOLICITADAS */}
-        {/* Favoritos e Notificações */}
         <Stack.Screen 
           name="Favoritos" 
           component={FavoritosScreen} 
@@ -169,7 +169,6 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  // Estilo principal da barra de navegação (Tab Bar)
   tabBar: {
     position: 'absolute',
     bottom: 25,
@@ -187,15 +186,11 @@ const styles = StyleSheet.create({
     paddingBottom: 5,
     paddingTop: 10,
   },
-
-  // Estilo do Rótulo (Texto)
   tabBarLabel: {
     fontSize: 12,
     fontWeight: '700',
     marginBottom: 5,
   },
-
-  // ÍCONE ATIVO: O círculo flutuante
   iconContainerActive: {
     position: 'absolute',
     top: -20,
@@ -211,8 +206,6 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 10,
   },
-
-  // ÍCONE INATIVO: Apenas o ícone na cor cinza, sem fundo
   iconContainerInactive: {
     padding: 0,
     backgroundColor: 'transparent',
