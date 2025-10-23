@@ -10,20 +10,26 @@ import {
   FlatList,
   Dimensions,
 } from "react-native";
-// IMPORTANTE: Adicionei 'useNavigation' para permitir a navegação dentro do componente
+// IMPORTAÇÕES NOVAS/ATUALIZADAS
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native"; 
+import { useNavigation } from "@react-navigation/native";
+import { LinearGradient } from 'expo-linear-gradient'; // <-- IMPORTAÇÃO NECESSÁRIA
 
 const { width } = Dimensions.get("window");
 // Largura do banner para FlatList
 const BANNER_WIDTH = width - 40;
-const MAIN_PINK = "#ff86b5"; // Rosa Principal Suave
+const MAIN_PINK = "#ff86b4"; // Rosa Principal Suave (Ajustado para o tom do card)
 const LIGHT_PINK = "#FDEFF1"; // Rosa muito claro para fundo de topo
+const VERY_LIGHT_PINK = "#fce3f7"; // Rosa usado no gradiente do card
 const LIGHT_BG = "#fff"; // Fundo Principal Branco
 
-// --- DADOS MOCK EXPANDIDOS ---
+// Largura do card para 2 colunas: (Largura da tela - padding*2 - margem única) / 2
+const HORIZONTAL_PADDING = 20;
+const PRODUCT_CARD_MARGIN = 20;
+const PRODUCT_CARD_WIDTH = (width - HORIZONTAL_PADDING * 2 - PRODUCT_CARD_MARGIN) / 2;
 
-// 1. Dados para Categorias
+// --- DADOS MOCK EXPANDIDOS ---
+// ... (Dados de categories, promotionBanners, products permanecem iguais) ...
 const categories = [
   { name: "Skin Care", icon: "eyedrop-outline" },
   { name: "Maquiagem", icon: "color-palette-outline" },
@@ -31,7 +37,6 @@ const categories = [
   { name: "Perfume", icon: "water-outline" },
 ];
 
-// 2. Dados para o CARROSSEL DE PROMOÇÕES
 const promotionBanners = [
   {
     id: 1,
@@ -53,21 +58,20 @@ const promotionBanners = [
   },
 ];
 
-// 3. Dados dos Produtos
 const products = [
-  { id: 1, name: "Casual V-neck", price: "$129.00", newPrice: "$99.90", image: require('../assets/prod.png') },
-  { id: 2, name: "Casual T-Shirt", price: "$113.00", newPrice: "$85.00", image: require('../assets/2.png') },
-  { id: 3, name: "High-Waist Jeans", price: "$199.00", newPrice: "$149.00", image: require('../assets/3.png') },
-  { id: 4, name: "Mineral Primer", price: "$44.90", newPrice: "$39.90", image: require('../assets/4.png') },
-  { id: 5, name: "Silk Scarf", price: "$55.00", newPrice: "$45.00", image: require('../assets/5.png') },
-  { id: 6, name: "Luxury Handbag", price: "$299.00", newPrice: "$250.00", image: require('../assets/6.png') },
-  { id: 7, name: "Lipstick Set", price: "$79.00", newPrice: "$65.00", image: require('../assets/7.png') },
-  { id: 8, name: "Sunscreen SPF50", price: "$35.00", newPrice: "$29.90", image: require('../assets/8.png') },
+  { id: 1, name: "Gloss Fran By Franciny", price: "R$65,90", newPrice: "R$59,67", image: require('../assets/prod.png'), rating: 4.8 },
+  { id: 2, name: "Casual T-Shirt", price: "$113.00", newPrice: "$85.00", image: require('../assets/2.png'), rating: 4.5 },
+  { id: 3, name: "High-Waist Jeans", price: "$199.00", newPrice: "$149.00", image: require('../assets/3.png'), rating: 4.9 },
+  { id: 4, name: "Mineral Primer", price: "$44.90", newPrice: "$39.90", image: require('../assets/4.png'), rating: 4.2 },
+  { id: 5, name: "Silk Scarf", price: "$55.00", newPrice: "$45.00", image: require('../assets/5.png'), rating: 4.6 },
+  { id: 6, name: "Luxury Handbag", price: "$299.00", newPrice: "$250.00", image: require('../assets/6.png'), rating: 4.7 },
+  { id: 7, name: "Lipstick Set", price: "$79.00", newPrice: "$65.00", image: require('../assets/7.png'), rating: 4.3 },
+  { id: 8, name: "Sunscreen SPF50", price: "$35.00", newPrice: "$29.90", image: require('../assets/8.png'), rating: 4.1 },
 ];
 
 // --- COMPONENTES AUXILIARES ---
 
-// 1. Banner de Carrossel
+// 1. Banner de Carrossel (Inalterado)
 const PromotionBanner = ({ item }) => (
   <TouchableOpacity style={bannerStyles.bannerContainer}>
     <Image
@@ -85,65 +89,73 @@ const PromotionBanner = ({ item }) => (
   </TouchableOpacity>
 );
 
-// 2. Card de Produto na Lista Principal (COM LÓGICA DE NAVEGAÇÃO)
+// 2. Card de Produto (AGORA COM ESTILO REPLICADO)
 const ProductCard = ({ product }) => {
-  const [isFavorite, setIsFavorite] = useState(false);
-  const navigation = useNavigation(); // Hook de navegação
+  // Use 'false' como estado inicial se não houver dados de favorito
+  const [isFavorite, setIsFavorite] = useState(false); 
+  const navigation = useNavigation();
 
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
   };
   
-  // Função para lidar com o clique no card
   const handleCardPress = () => {
-    // Determina o nome da tela de destino dinamicamente:
-    // Se id é 1, vai para 'Produto'. Se id é 2, vai para 'Produto2', etc.
     const screenName = product.id === 1 ? 'Produto' : `Produto${product.id}`;
-    
-    // Navega para a tela de produto correta
     navigation.navigate(screenName);
   };
 
   return (
     <TouchableOpacity style={styles.productCard} onPress={handleCardPress}>
-      {/* Ícone de favorito/coração clicável */}
-      <TouchableOpacity
-        style={styles.favoriteIconContainer}
-        onPress={toggleFavorite}
-      >
+      {/* 1. Área da Imagem com Gradiente Rosa Suave */}
+      <View style={styles.productImageBackground}>
+        <LinearGradient
+          colors={[VERY_LIGHT_PINK, '#fff']} // Gradiente do rosa claro para branco
+          style={styles.gradientOverlay}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+        >
+          <Image
+            source={product.image}
+            style={styles.productImage}
+            resizeMode="contain"
+          />
+        </LinearGradient>
+      </View>
+
+      {/* 2. Botão de Favorito (Top Right) - Replicado o visual da imagem */}
+      <TouchableOpacity onPress={toggleFavorite} style={styles.favoriteButton}>
         <Ionicons
-          name={isFavorite ? "heart" : "heart-outline"}
-          size={20}
-          color={isFavorite ? "red" : MAIN_PINK}
+          name={isFavorite ? 'heart' : 'heart'} // Coração sempre preenchido na ref
+          size={22}
+          color={MAIN_PINK} 
         />
       </TouchableOpacity>
 
-      {/* Imagem do Produto */}
-      <Image
-        source={product.image}
-        style={styles.productImage}
-      />
+      {/* 3. Detalhes do Produto (Fundo Branco) */}
+      <View style={styles.productDetails}>
+        <Text style={styles.productName} numberOfLines={2}>{product.name}</Text>
 
-      <View style={styles.productInfo}>
-        <Text style={styles.productName} numberOfLines={1}>
-          {product.name}
-        </Text>
         <View style={styles.priceContainer}>
-          <Text style={styles.productOldPrice}>{product.price}</Text>
-          <Text style={styles.productNewPrice}>{product.newPrice}</Text>
+          {/* Preço Original Riscado */}
+          <Text style={styles.originalPrice}>
+            {product.price}
+          </Text>
+          {/* Preço Promocional em Destaque */}
+          <Text style={styles.currentPrice}>{product.newPrice}</Text>
         </View>
+
+        {/* Avaliação por Estrelas */}
         <View style={styles.ratingContainer}>
-          <Ionicons name="star" size={14} color="#FFC72C" />
-          <Text style={styles.ratingText}>4.5</Text>
+          {/* Estrela Amarela sólida (como na referência) */}
+          <Ionicons name="star" size={16} color="#FFD700" /> 
+          <Text style={styles.ratingText}>{product.rating ? product.rating.toFixed(1) : '4.5'}</Text>
         </View>
       </View>
     </TouchableOpacity>
   );
 };
 
-// 3. Card de Categoria
-// ...existing code...
-// 3. Card de Categoria (com navegação)
+// 3. Card de Categoria (com navegação) - Inalterado
 const CategoryCard = ({ item }) => {
   const navigation = useNavigation();
 
@@ -170,17 +182,14 @@ const CategoryCard = ({ item }) => {
     </TouchableOpacity>
   );
 };
-// ...existing code...
 
 // --- COMPONENTE PRINCIPAL (HomeScreen) ---
 export default function HomeScreen() { 
-  const navigation = useNavigation(); // <-- 1. Inicializa o hook de navegação
+  const navigation = useNavigation();
   const [searchText, setSearchText] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
 
-  // FUNÇÃO DE NAVEGAÇÃO PARA FAVORITOS (MUDANÇA ESSENCIAL)
-  const handleFavoritesPress = () => { // <-- 2. Cria a função de navegação
-      // Navega para a tela 'FavoritosScreen', conforme o seu App.js
+  const handleFavoritesPress = () => {
       navigation.navigate('Favoritos'); 
   };
 
@@ -197,7 +206,7 @@ export default function HomeScreen() {
     <ScrollView
       style={styles.container}
       showsVerticalScrollIndicator={false}
-      // Mantém o espaço para a navegação por abas
+      // Mantém o espaço para a navegação por abas (Lembrete: 2025-10-21)
       contentContainerStyle={styles.scrollViewContent}
     >
       {/* Fundo Rosa Suave no topo */}
@@ -229,10 +238,10 @@ export default function HomeScreen() {
             onChangeText={setSearchText}
           />
         </View>
-        {/* Botão de Filtro Rosa com Ícone de Coração (AGORA COM onPRESS) */}
+        {/* Botão de Filtro Rosa com Ícone de Coração */}
         <TouchableOpacity 
           style={styles.filterButton} 
-          onPress={handleFavoritesPress} // <-- 3. Adiciona o evento de navegação
+          onPress={handleFavoritesPress} 
         >
           <Ionicons name="heart-outline" size={24} color="#fff" />
         </TouchableOpacity>
@@ -299,6 +308,7 @@ export default function HomeScreen() {
       </View>
       <View style={styles.productsGrid}>
         {products.map((item) => (
+          // Garante que o ProductCard use a largura correta para duas colunas
           <ProductCard key={item.id} product={item} />
         ))}
       </View>
@@ -306,7 +316,7 @@ export default function HomeScreen() {
   );
 }
 
-// --- ESTILOS DO CARROSSEL DE PROMOÇÃO ---
+// --- ESTILOS DO CARROSSEL DE PROMOÇÃO (Inalterados) ---
 const bannerStyles = StyleSheet.create({
   bannerContainer: {
     width: BANNER_WIDTH,
@@ -360,13 +370,13 @@ const bannerStyles = StyleSheet.create({
   },
 });
 
-// --- ESTILOS GERAIS E CARTÕES DE PRODUTO/CATEGORIA ---
+// --- ESTILOS GERAIS E CARTÕES DE PRODUTO/CATEGORIA (ATUALIZADOS) ---
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: LIGHT_BG,
   },
-  // IMPORTANTE: Espaço para o Tab Bar (75 height + 25 bottom)
+  // IMPORTANTE: Espaço para o Tab Bar (Lembrete: 2025-10-21)
   scrollViewContent: {
     paddingBottom: 100,
   },
@@ -383,12 +393,12 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 30,
   },
 
-  // Topo (Localização e Carrinho - Carrinho Removido)
+  // Topo (Localização)
   searchBarContainer: {
     flexDirection: "row",
-    justifyContent: "flex-start", // Ajustado para não ter espaço para o carrinho
+    justifyContent: "flex-start",
     alignItems: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: HORIZONTAL_PADDING,
     paddingTop: 50,
   },
   locationContainer: {
@@ -411,7 +421,7 @@ const styles = StyleSheet.create({
   searchFilterRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: HORIZONTAL_PADDING,
     paddingBottom: 20,
     marginTop: 10,
     zIndex: 5,
@@ -452,12 +462,12 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
 
-  // Cabeçalho de Seção (Ofertas, Categoria, Recomendados)
+  // Cabeçalho de Seção
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: HORIZONTAL_PADDING,
     marginBottom: 15,
     marginTop: 10,
   },
@@ -477,7 +487,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   carouselList: {
-    paddingHorizontal: 20,
+    paddingHorizontal: HORIZONTAL_PADDING,
   },
   indicatorContainer: {
     flexDirection: "row",
@@ -500,7 +510,7 @@ const styles = StyleSheet.create({
 
   // Lista de Categorias
   categoryList: {
-    paddingHorizontal: 20,
+    paddingHorizontal: HORIZONTAL_PADDING,
     marginBottom: 30,
     justifyContent: "space-between",
   },
@@ -530,78 +540,95 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
+    paddingHorizontal: HORIZONTAL_PADDING,
   },
+  
+  // =======================================================
+  // --- ESTILOS DO CARD DE PRODUTO (REPLICADOS) ---
+  // =======================================================
   productCard: {
-    width: "47%",
-    marginBottom: 20,
-    backgroundColor: "#fff",
-    borderRadius: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
-    position: "relative",
+    width: PRODUCT_CARD_WIDTH, // Largura calculada
+    marginBottom: PRODUCT_CARD_MARGIN,
+    backgroundColor: '#fff',
+    borderRadius: 20, // Borda super arredondada (igual à ref)
+    // Sombra suave
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.05, 
+    shadowRadius: 10,
+    elevation: 8,
+    position: 'relative',
+    overflow: 'hidden', // Importante para o card manter o gradiente dentro
   },
-  // Estilo aprimorado para o botão de curtir
-  favoriteIconContainer: {
-    position: "absolute",
-    top: 8,
-    right: 8,
-    backgroundColor: "rgba(255, 255, 255, 0.9)", // Mais opaco para destaque
-    borderRadius: 15,
-    padding: 5,
-    zIndex: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.3, // Sombra mais evidente
-    shadowRadius: 2,
-    elevation: 3,
+  productImageBackground: {
+    width: '100%',
+    height: 160, // Altura da imagem para o HomeScreen
+  },
+  gradientOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   productImage: {
-    width: "100%",
-    height: 160,
-    resizeMode: "contain",
-    backgroundColor: "#F7F7F7",
-    borderTopLeftRadius: 15,
-    borderTopRightRadius: 15,
+    width: '80%', 
+    height: '80%',
+    // Sem border radius aqui, pois o gradiente que faz o topo do card
   },
-  productInfo: {
-    padding: 12,
-    alignItems: "flex-start",
+  favoriteButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    // Sombra do botão
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    zIndex: 10,
+  },
+  productDetails: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    paddingTop: 8,
   },
   productName: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#000",
-    marginBottom: 5,
+    fontSize: 18, // Aumentado para o estilo da ref
+    fontWeight: '800', 
+    color: '#333',
+    marginBottom: 10,
+    minHeight: 45,
   },
   priceContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
   },
-  productOldPrice: {
-    fontSize: 13,
-    fontWeight: "500",
-    color: "#999",
-    textDecorationLine: "line-through",
-    marginRight: 8,
-  },
-  productNewPrice: {
+  originalPrice: {
     fontSize: 15,
-    fontWeight: "800",
-    color: MAIN_PINK,
+    color: '#a1a1aa', // Cinza médio
+    textDecorationLine: 'line-through',
+    marginRight: 10,
+    fontWeight: '500',
+  },
+  currentPrice: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: MAIN_PINK, // Usa o MAIN_PINK ajustado (#ff86b4)
   },
   ratingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   ratingText: {
-    fontSize: 12,
-    marginLeft: 4,
-    color: "#555",
-    fontWeight: "600",
+    fontSize: 15, // Aumentado para o estilo da ref
+    color: '#333',
+    marginLeft: 5,
+    fontWeight: '600',
   },
 });

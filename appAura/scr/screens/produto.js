@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -6,249 +6,448 @@ import { Ionicons } from '@expo/vector-icons';
 const PRIMARY_PINK = '#ff86b5'; // Rosa Vibrante
 const LIGHT_PINK = '#ffeaf3'; // Rosa Claro para fundo
 const CARD_BACKGROUND = '#fff'; // Branco
-const INACTIVE_GRAY = '#aaa'; // Cinza para textos secundários
+const STAR_COLOR = '#FFD700'; // Amarelo Dourado para estrelas
+const INACTIVE_GRAY = '#aaa'; // Cinza para textos secundários e inativos
 
 // Obter a altura da tela para layout responsivo
-const { height } = Dimensions.get('window');
+const { height, width } = Dimensions.get('window');
+
+// Dados Mock do Produto (Simulando o Gloss Fran com um Preço de Exemplo)
+const productData = {
+    id: 1, 
+    name: "Gloss Fran By Franciny", 
+    priceValue: 59.67, // Valor numérico para cálculo
+    priceText: "R$ 59,67", 
+    location: "2.8 Km de distância", // TRADUZIDO
+    rating: 4.8,
+    details: "Um gloss labial com textura não pegajosa e acabamento luxuoso de mel. Contém ingredientes hidratantes que nutrem os lábios, proporcionando um volume natural e um brilho espelhado. Perfeito para uso diário ou sobre batom. Há muitas variações de passagens de Lorem Ipsum disponíveis, mas a maioria sofreu alguma forma, por humor injetado ou palavras aleatórias que não parecem...", // TRADUZIDO
+    image: require('../assets/prod.png'), 
+};
 
 // Componente da Tela de Produto
 export default function Produto({ navigation }) {
+    const [quantity, setQuantity] = useState(1);
+    const [isFavorite, setIsFavorite] = useState(false);
 
-  // Função fictícia para simular a ação de adicionar ao carrinho
-  const handleAddToCart = () => {
-    alert('Produto adicionado ao carrinho!'); 
-    // Substituir por lógica real de carrinho
-  };
+    const handleQuantityChange = (type) => {
+        if (type === 'increment') {
+            setQuantity(prev => prev + 1);
+        } else if (type === 'decrement' && quantity > 1) {
+            setQuantity(prev => prev - 1);
+        }
+    };
 
-  // Função para voltar para a tela anterior
-  const handleGoBack = () => {
-    navigation.goBack();
-  };
+    // TRADUZIDO
+    const handleAddToCart = () => {
+        alert(`Adicionado ${quantity}x de "${productData.name}" ao carrinho!`);
+    };
+    
+    // TRADUZIDO
+    const handlePlaceOrder = () => {
+        alert(`Pedido de ${quantity}x de "${productData.name}" realizado!`);
+    };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        
-        {/* Header e Botão Voltar */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
-            <Ionicons name="arrow-back-outline" size={28} color="#444" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.favoriteButton}>
-             {/* Ícone de favorito/coração */}
-            <Ionicons name="heart-outline" size={26} color="#444" /> 
-          </TouchableOpacity>
-        </View>
+    const handleGoBack = () => {
+        navigation.goBack();
+    };
 
-        {/* Área da Imagem (simulando a imagem que você irá colocar na pasta) */}
-        <View style={styles.imagePlaceholderContainer}>
-          {/* IMPORTANTE: Troque o 'require' abaixo pelo caminho real da sua imagem.
-            Exemplo: 
-            <Image 
-              source={require('../assets/sua_imagem_aqui.png')} 
-              style={styles.productImage}
-            />
-          */}
-           <Image
-  source={require('../assets/prod.png')}
-  style={styles.productImage}
-  resizeMode="contain"
-/>
+    // Formatação do preço total para o padrão brasileiro (R$ X,XX)
+    const totalPrice = (productData.priceValue * quantity).toFixed(2).replace('.', ',');
 
-        </View>
+    // Renderiza 5 estrelas ativas para a avaliação do produto
+    const renderActiveStars = () => {
+        const fullStars = Math.floor(productData.rating);
+        const hasHalfStar = productData.rating % 1 !== 0;
+        const stars = [];
 
-        {/* Card de Detalhes do Produto */}
-        <View style={styles.detailsCard}>
-          <Text style={styles.productTitle}>Nome do Produto 1</Text>
-          
-          {/* Seção de Preço */}
-          <View style={styles.priceContainer}>
-            <Text style={styles.productPrice}>R$ 99,90</Text>
-          </View>
-          
-          {/* Descrição do Produto */}
-          <Text style={styles.descriptionHeader}>Descrição:</Text>
-          <Text style={styles.productDescription}>
-            Esta é uma descrição detalhada e atraente do Produto 1. 
-            Ele possui características incríveis, benefícios exclusivos e é exatamente o que você precisa. 
-            Aqui você pode adicionar informações sobre material, tamanho, e outras especificações técnicas 
-            para convencer o cliente.
-          </Text>
-          
-          {/* Seção de Opções (Cor, Tamanho, etc. - Adicione conforme necessário) */}
-          <View style={styles.optionsContainer}>
-            <Text style={styles.optionLabel}>Cor:</Text>
-            <View style={styles.colorSwatch}></View>
-          </View>
+        for (let i = 0; i < 5; i++) {
+            if (i < fullStars) {
+                stars.push(<Ionicons key={i} name="star" size={18} color={PRIMARY_PINK} style={styles.star} />);
+            } else if (i === fullStars && hasHalfStar) {
+                stars.push(<Ionicons key={i} name="star-half" size={18} color={PRIMARY_PINK} style={styles.star} />);
+            } else {
+                stars.push(<Ionicons key={i} name="star-outline" size={18} color={PRIMARY_PINK} style={styles.star} />);
+            }
+        }
+        return stars;
+    };
+    
+    // Renderiza 5 estrelas inativas para a seção "Dê sua avaliação"
+    const renderInactiveStars = () => {
+        const stars = [];
+        for (let i = 0; i < 5; i++) {
+            stars.push(<Ionicons key={i} name="star-outline" size={18} color={INACTIVE_GRAY} style={styles.star} />);
+        }
+        return stars;
+    };
 
-        </View>
 
-        {/* Espaço extra para compensar a Tab Bar (se necessário) */}
-        <View style={{ height: 100 }}></View> 
-
-      </ScrollView>
-
-      {/* FOOTER - Botão Adicionar ao Carrinho */}
-      <View style={styles.footer}>
-        <TouchableOpacity 
-          style={styles.addToCartButton}
-          onPress={handleAddToCart}
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView 
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
         >
-          <Ionicons name="cart-outline" size={24} color="#fff" style={{ marginRight: 10 }} />
-          <Text style={styles.buttonText}>Adicionar ao Carrinho</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
-  );
+        
+        {/* Área da Imagem em Destaque */}
+        <View style={styles.imagePlaceholderContainer}>
+           <Image
+              source={productData.image}
+              style={styles.productImage}
+              resizeMode="contain"
+            />
+        </View>
+
+        {/* Header e Botão Voltar (Flutuante) */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={handleGoBack} style={styles.buttonStyle}>
+            <Ionicons name="arrow-back-outline" size={24} color="#444" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.buttonStyle} onPress={() => setIsFavorite(!isFavorite)}>
+            <Ionicons name={isFavorite ? "heart" : "heart-outline"} size={24} color={isFavorite ? PRIMARY_PINK : "#444"} /> 
+          </TouchableOpacity>
+        </View>
+
+
+        {/* Card de Detalhes do Produto */}
+        <View style={styles.detailsCard}>
+          <Text style={styles.productTitle}>{productData.name}</Text>
+          
+          {/* Distância e Preço */}
+            <View style={styles.topInfoRow}>
+                {/* Distância */}
+                <View style={styles.locationContainer}>
+                    <Ionicons name="location-outline" size={16} color={INACTIVE_GRAY} style={{ marginRight: 5 }} />
+                    <Text style={styles.locationText}>{productData.location}</Text>
+                </View>
+                {/* Preço e Frete Grátis */}
+                <View style={styles.priceContainer}>
+                    <Text style={styles.productPrice}>R$ {productData.priceValue.toFixed(2).replace('.', ',')}</Text>
+                    <Text style={styles.freeShippingText}>Frete Grátis</Text>
+                </View>
+            </View>
+          
+          {/* Avaliação e Dê sua avaliação */}
+            <View style={styles.ratingRow}>
+                <View>
+                    {/* TRADUZIDO: "4.8 avaliação" */}
+                    <Text style={styles.ratingHeader}>{productData.rating.toFixed(1)} avaliação</Text>
+                    <View style={styles.starsContainer}>
+                        {renderActiveStars()}
+                    </View>
+                </View>
+                
+                <View style={{ alignItems: 'flex-end' }}>
+                    <Text style={styles.ratingHeader}>Dê sua avaliação</Text>
+                    <View style={styles.starsContainer}>
+                        {renderInactiveStars()}
+                    </View>
+                </View>
+            </View>
+
+            {/* Linha Divisória */}
+            <View style={styles.divider} />
+
+
+          {/* Descrição do Produto (Detalhes) */}
+          <Text style={styles.sectionHeader}>Detalhes</Text>
+          <Text style={styles.productDescription} numberOfLines={4}>
+            {productData.details}
+          </Text>
+            {/* TRADUZIDO: "... Ler mais" */}
+            <TouchableOpacity onPress={() => {/* Adicionar lógica de "Ler Mais" */}}>
+                <Text style={styles.readMoreText}>... Ler mais</Text>
+            </TouchableOpacity>
+
+            {/* Linha Divisória */}
+            <View style={styles.divider} />
+
+            {/* Quantidade */}
+            <View style={styles.quantityContainer}>
+                <Text style={styles.quantityLabel}>Quantidade</Text>
+                <View style={styles.quantityControls}>
+                    <TouchableOpacity style={styles.qtyButton} onPress={() => handleQuantityChange('decrement')}>
+                        <Ionicons name="remove-circle-sharp" size={28} color={quantity > 1 ? PRIMARY_PINK : INACTIVE_GRAY} />
+                    </TouchableOpacity>
+                    <Text style={styles.qtyText}>{quantity}</Text>
+                    <TouchableOpacity style={styles.qtyButton} onPress={() => handleQuantityChange('increment')}>
+                        <Ionicons name="add-circle-sharp" size={28} color={PRIMARY_PINK} />
+                    </TouchableOpacity>
+                </View>
+            </View>
+            
+            {/* Preço Total */}
+            <View style={styles.totalPriceContainer}>
+                <Text style={styles.totalPriceLabel}>Preço Total</Text>
+                <Text style={styles.totalPriceText}>R$ {totalPrice}</Text>
+            </View>
+
+        </View>
+
+        {/* Espaço extra para compensar o rodapé/Tab Bar */}
+        <View style={{ height: 100 }}></View> 
+
+      </ScrollView>
+
+      {/* RODAPÉ - Botões "Adicionar ao Carrinho" e "Finalizar Pedido" */}
+      <View style={styles.footer}>
+        {/* Botão Adicionar ao Carrinho */}
+        <TouchableOpacity 
+          style={styles.addToCartButton}
+          onPress={handleAddToCart}
+        >
+          <Text style={styles.addToCartText}>Adicionar ao Carrinho</Text>
+        </TouchableOpacity>
+        
+        {/* Botão Finalizar Pedido */}
+        <TouchableOpacity 
+          style={styles.placeOrderButton}
+          onPress={handlePlaceOrder}
+        >
+          <Text style={styles.placeOrderText}>Finalizar Pedido</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: LIGHT_PINK,
-  },
-  scrollContent: {
-    paddingBottom: 20,
-    minHeight: height, // Garante que o ScrollView ocupe pelo menos a altura da tela
-  },
+  container: {
+    flex: 1,
+    backgroundColor: LIGHT_PINK,
+  },
+  scrollContent: {
+    paddingBottom: 0,
+    minHeight: height, 
+  },
+
+// --- CABEÇALHO (FLUTUANTE) ---
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    position: 'absolute',
+    top: 50,
+    left: 0,
+    right: 0,
+    zIndex: 10, 
+  },
+  buttonStyle: {
+    backgroundColor: CARD_BACKGROUND,
+    borderRadius: 50,
+    padding: 10,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+  },
+
+// --- IMAGEM ---
+  imagePlaceholderContainer: {
+    width: '100%',
+    height: height * 0.45, 
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: LIGHT_PINK,
+    overflow: 'hidden',
+  },
+  productImage: {
+    width: '80%', 
+    height: '80%',
+    borderRadius: 15,
+  },
+
+// --- CARD DE DETALHES ---
+  detailsCard: {
+    backgroundColor: CARD_BACKGROUND,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    padding: 25,
+    marginTop: -50,
+    elevation: 15, 
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: -5 },
+    shadowRadius: 15,
+  },
+  productTitle: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: '#333',
+    marginBottom: 10,
+  },
+
+// --- LINHA DE INFORMAÇÃO SUPERIOR (Distância e Preço/Frete) ---
+  topInfoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10, // Garante que fique acima da imagem
-  },
-  backButton: {
-    backgroundColor: CARD_BACKGROUND,
-    borderRadius: 50,
-    padding: 8,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-  },
-  favoriteButton: {
-    backgroundColor: CARD_BACKGROUND,
-    borderRadius: 50,
-    padding: 8,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-  },
-  imagePlaceholderContainer: {
-    width: '100%',
-    height: 400, // Altura fixa para a área da imagem
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: LIGHT_PINK,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    overflow: 'hidden',
-  },
-  productImage: {
-    width: '90%',
-    height: '90%',
-    borderRadius: 15,
-  },
-  detailsCard: {
-    backgroundColor: CARD_BACKGROUND,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    padding: 25,
-    marginTop: -30, // Sobrepõe um pouco a área da imagem
-    elevation: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: -5 },
-    shadowRadius: 10,
-  },
-  productTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
-  },
-  priceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
     marginBottom: 20,
   },
-  productPrice: {
-    fontSize: 32,
-    fontWeight: '900',
-    color: PRIMARY_PINK,
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  descriptionHeader: {
+  locationText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    color: INACTIVE_GRAY,
+    fontWeight: '500',
+  },
+  priceContainer: {
+    alignItems: 'flex-end',
+  },
+  productPrice: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: PRIMARY_PINK,
+  },
+  freeShippingText: {
+    fontSize: 14,
+    color: INACTIVE_GRAY,
+    fontWeight: '500',
+  },
+
+// --- LINHA DE AVALIAÇÃO ---
+  ratingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  ratingHeader: {
+    fontSize: 14,
     color: '#333',
-    marginTop: 15,
+    fontWeight: '600',
     marginBottom: 5,
   },
-  productDescription: {
-    fontSize: 16,
-    color: '#555',
-    lineHeight: 24,
-    marginBottom: 30,
-  },
-  optionsContainer: {
+  starsContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
   },
-  optionLabel: {
-    fontSize: 16,
+  star: {
+    marginRight: 2,
+  },
+
+// --- DETALHES E DESCRIÇÃO ---
+  divider: {
+    height: 1,
+    backgroundColor: '#eee',
+    marginVertical: 15,
+  },
+  sectionHeader: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
+  },
+  productDescription: {
+    fontSize: 15,
+    color: '#555',
+    lineHeight: 22,
+  },
+  readMoreText: {
+    color: PRIMARY_PINK,
+    fontWeight: '600',
+    fontSize: 15,
+    marginTop: 5,
+  },
+  
+// --- QUANTIDADE E PREÇO TOTAL ---
+  quantityContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  quantityLabel: {
+    fontSize: 18,
     color: '#333',
-    marginRight: 10,
     fontWeight: '600',
   },
-  colorSwatch: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: PRIMARY_PINK, // Cor de exemplo
-    borderWidth: 2,
-    borderColor: '#fff',
-    elevation: 3,
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 40, // Espaço para a Tab Bar (considerando o `bottom: 25` e `height: 75` dela no App.js)
-    backgroundColor: CARD_BACKGROUND,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-    elevation: 15,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-  },
-  addToCartButton: {
+  quantityControls: {
     flexDirection: 'row',
-    backgroundColor: PRIMARY_PINK,
-    padding: 15,
-    borderRadius: 15,
     alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 5,
-    shadowColor: PRIMARY_PINK,
-    shadowOpacity: 0.5,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 10,
   },
-  buttonText: {
-    color: '#fff',
+  qtyButton: {
+    paddingHorizontal: 5,
+  },
+  qtyText: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '700',
+    color: '#333',
+    marginHorizontal: 10,
   },
+  totalPriceContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  totalPriceLabel: {
+    fontSize: 20,
+    color: '#333',
+    fontWeight: '700',
+  },
+  totalPriceText: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: PRIMARY_PINK,
+  },
+
+
+// --- RODAPÉ COM DOIS BOTÕES ---
+  footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row', 
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 15,
+    paddingBottom: 35,
+    backgroundColor: CARD_BACKGROUND,
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+    elevation: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+  },
+  addToCartButton: {
+    flex: 1,
+    backgroundColor: CARD_BACKGROUND,
+    padding: 15,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: PRIMARY_PINK,
+    marginRight: 10,
+  },
+  addToCartText: {
+    color: PRIMARY_PINK,
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  placeOrderButton: {
+    flex: 1,
+    backgroundColor: PRIMARY_PINK,
+    padding: 15,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 10,
+    elevation: 5,
+    shadowColor: PRIMARY_PINK,
+    shadowOpacity: 0.5,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 10,
+  },
+  placeOrderText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
 });
