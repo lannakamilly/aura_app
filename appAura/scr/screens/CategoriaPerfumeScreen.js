@@ -24,20 +24,20 @@ const HORIZONTAL_PADDING = 24; // Padding horizontal da lista
 const products = [
   {
     id: 'p1',
-    name: 'Óleo Nutritivo Ox Nutre 120ml',
+    name: 'Good Girl Carolina Herrera 50ml',
     originalPrice: 'R$159,90',
     price: 'R$129,90',
     rating: 4.8,
-    imageUrl: 'https://i.pinimg.com/736x/62/2c/39/622c391cc89b333242f0c96a72ca4af4.jpg',
+    imageUrl: 'https://acdn-us.mitiendanube.com/stores/001/867/451/products/chatgpt-image-10-de-abr-de-2025-16_49_38-990f31021b5e35587c17443145878365-1024-1024.png',
     isFavorite: true,
   },
   {
     id: 'p2',
-    name: 'Sérum L’Oréal Paris Reparação Total',
+    name: 'Lancôme La Vie Est Eelle',
     originalPrice: 'R$45,00',
     price: 'R$36,96',
     rating: 4.5,
-    imageUrl: 'https://i.pinimg.com/736x/ff/ee/53/ffee53ca6a7d0ecdc28c8b1236e55465.jpg',
+    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:eco,w_800/v1/imagens/product/34728/4e064f04-8216-4c21-9ae5-66ba88ee03ac-la-vie-est-belle-lancome-eau-de-parfum-perfume-feminino-100ml.png',
     isFavorite: false,
   },
   {
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
   },
   heroTitleContainer: {
     position: 'absolute',
-    bottom: 30,
+    bottom: 40,
     left: HORIZONTAL_PADDING,
   },
   heroSubtitle: {

@@ -229,10 +229,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   mainTitle: {
-    fontSize: 24,
-    fontWeight: '400',
-    color: '#333',
-    letterSpacing: -0.5,
+    fontSize: 38,
+    fontWeight: '800',
+    color: "#ff86b5", // Cor ajustada para um visual mais neutro/profissional
+    lineHeight: 40,
+    marginBottom: 2,
   },
   subHeading: {
     fontSize: 38,
