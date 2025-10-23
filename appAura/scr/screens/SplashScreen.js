@@ -6,7 +6,7 @@ export default function SplashScreen() {
     <View style={styles.container}>
       {/* Imagem de fundo que cobre toda a tela */}
       <Image
-        source={require("../assets/fundo rosa.jpg")}  // Substitua pelo caminho da sua imagem de fundo
+        source={require("../assets/splash.jpg")}  // Substitua pelo caminho da sua imagem de fundo
         style={styles.backgroundImage}
         resizeMode="cover"
       />

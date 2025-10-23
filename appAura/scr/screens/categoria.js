@@ -1,158 +1,105 @@
 import React, { useEffect, useRef } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity, 
-  FlatList, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
   Animated,
   Dimensions,
   StatusBar,
-  Image
+  Image, // Componente Image adicionado
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Svg, { 
-  Rect, 
-  Path, 
-  Circle, 
-  Ellipse, 
-  Defs, 
-  LinearGradient as SvgLinearGradient, 
-  RadialGradient as SvgRadialGradient,
-  Stop 
-} from 'react-native-svg';
 
 const { width } = Dimensions.get('window');
+const CARD_PADDING = 20; // Padding horizontal da FlatList
+const CARD_MARGIN = 10; // Margem entre os cards
+const CARD_WIDTH = (width - CARD_PADDING * 2 - CARD_MARGIN * 2) / 2; // Largura do card para 2 colunas
 
-// --- Dados das Categorias ---
+// --- Dados das 4 Categorias ---
 const categories = [
-  { 
-    id: '1', 
-    name: 'Cabelo', 
-    description: 'Shampoos, condicionadores e tratamentos',
-    bgColor: ['#FDF0F0', '#fce4e4'],
-    image: require('../assets/cabelo-categoria.jpg'),
+  {
+    id: '1',
+    name: 'Cabelo',
+    description: 'Shampoos, condicionadores e finalizadores',
     icon: '💇‍♀️',
-    type: 'cabelo'
+    type: 'Cabelo',
+    screen: 'CategoriaCabelo',
+    // Imagem de alta qualidade com tema de cabelo
+    imageUrl: 'https://i.pinimg.com/1200x/1d/36/d4/1d36d4b0f0d80d784799f4f2e15b0aa3.jpg', 
   },
-  { 
-    id: '2', 
-    name: 'Pele', 
-    description: 'Cuidados faciais e corporais',
-    bgColor: ['#F0FDF5', '#e4fce7'],
-    image: require('../assets/pele-categoria.jpg'),
-    icon: '🧴',
-    type: 'pele'
+  {
+    id: '2',
+    name: 'Pele',
+    description: 'Cuidados faciais, séruns e hidratação',
+    icon: '💧',
+    type: 'Pele',
+    screen: 'CategoriaPele',
+    // Imagem de alta qualidade com tema de pele/skincare
+    imageUrl: 'https://i.pinimg.com/1200x/86/31/4c/86314ce6fb8b31aaba7bafac68cba6ba.jpg', 
   },
-  { 
-    id: '3', 
-    name: 'Maquiagem', 
-    description: 'Bases, batons e pincéis',
-    bgColor: ['#F0F8FD', '#e4f4fc'],
-    image: require('../assets/maquiag-categoria.jpg'),
+  {
+    id: '3',
+    name: 'Maquiagem',
+    description: 'Bases, batons, paletas e pincéis',
     icon: '💄',
-    type: 'maquiagem'
+    type: 'Maquiagem',
+    screen: 'CategoriaMaquiagem',
+    // Imagem de alta qualidade com tema de maquiagem
+    imageUrl: 'https://i.pinimg.com/1200x/27/20/56/2720561f5aa6a9d7c502cac7101c9a00.jpg', 
+  },
+  {
+    id: '4',
+    name: 'Perfume',
+    description: 'Fragrâncias femininas e masculinas exclusivas',
+    icon: '🌸',
+    type: 'Perfume',
+    screen: 'CategoriaPerfume',
+    // Imagem de alta qualidade com tema de perfume
+    imageUrl: 'https://i.pinimg.com/736x/8e/64/e3/8e64e32536cbdd6581ed297ad2d909fe.jpg', 
   },
 ];
-
-const CabeloSVG = () => (
-  <Svg width="100%" height="100%" viewBox="0 0 200 160">
-    <Defs>
-      <SvgLinearGradient id="hairGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <Stop offset="0%" stopColor="#8B4513" stopOpacity="1" />
-        <Stop offset="50%" stopColor="#D2691E" stopOpacity="1" />
-        <Stop offset="100%" stopColor="#CD853F" stopOpacity="1" />
-      </SvgLinearGradient>
-    </Defs>
-    <Rect width="200" height="160" fill="#FDF0F0"/>
-    <Path d="M40 80 Q60 60, 80 80 T120 80 T160 80" stroke="url(#hairGradient)" strokeWidth="8" fill="none"/>
-    <Path d="M35 90 Q55 70, 75 90 T115 90 T155 90" stroke="url(#hairGradient)" strokeWidth="6" fill="none"/>
-    <Path d="M45 100 Q65 80, 85 100 T125 100 T165 100" stroke="url(#hairGradient)" strokeWidth="7" fill="none"/>
-    <Rect x="20" y="20" width="15" height="25" rx="3" fill="#ff86b5"/>
-    <Rect x="40" y="15" width="12" height="30" rx="2" fill="#ff6b9d"/>
-    <Circle cx="170" cy="30" r="8" fill="#ffb3d1"/>
-  </Svg>
-);
-
-const PeleSVG = () => (
-  <Svg width="100%" height="100%" viewBox="0 0 200 160">
-    <Defs>
-      <SvgRadialGradient id="skinGradient" cx="50%" cy="50%" r="50%">
-        <Stop offset="0%" stopColor="#FFE4E1" stopOpacity="1" />
-        <Stop offset="100%" stopColor="#FFDAB9" stopOpacity="1" />
-      </SvgRadialGradient>
-    </Defs>
-    <Rect width="200" height="160" fill="#F0FDF5"/>
-    <Ellipse cx="100" cy="80" rx="45" ry="50" fill="url(#skinGradient)"/>
-    <Rect x="30" y="30" width="20" height="15" rx="7" fill="#4ade80"/>
-    <Circle cx="160" cy="40" r="12" fill="#22c55e"/>
-    <Rect x="25" y="120" width="18" height="25" rx="4" fill="#16a34a"/>
-    <Circle cx="85" cy="70" r="2" fill="#333"/>
-    <Circle cx="115" cy="70" r="2" fill="#333"/>
-    <Path d="M90 90 Q100 95, 110 90" stroke="#ff86b5" strokeWidth="2" fill="none"/>
-  </Svg>
-);
-
-const MaquiagemSVG = () => (
-  <Svg width="100%" height="100%" viewBox="0 0 200 160">
-    <Rect width="200" height="160" fill="#F0F8FD"/>
-    <Rect x="40" y="60" width="8" height="40" rx="4" fill="#333"/>
-    <Rect x="38" y="50" width="12" height="15" rx="6" fill="#ff1744"/>
-    <Rect x="80" y="40" width="60" height="35" rx="5" fill="#333"/>
-    <Circle cx="95" cy="55" r="8" fill="#ff86b5"/>
-    <Circle cx="115" cy="55" r="8" fill="#9c27b0"/>
-    <Circle cx="125" cy="55" r="8" fill="#3f51b5"/>
-    <Rect x="160" y="30" width="3" height="50" fill="#8d6e63"/>
-    <Ellipse cx="161.5" cy="25" rx="6" ry="8" fill="#ff86b5"/>
-    <Circle cx="120" cy="120" r="25" fill="#e3f2fd" stroke="#90caf9" strokeWidth="2"/>
-  </Svg>
-);
 
 // --- Componente Card de Categoria ---
 const CategoryCard = ({ item, onPress, index }) => {
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const translateYAnim = useRef(new Animated.Value(30)).current;
 
+  // Animação de entrada dos cards
   useEffect(() => {
     Animated.parallel([
       Animated.timing(scaleAnim, {
         toValue: 1,
         duration: 600,
-        delay: index * 200,
+        delay: index * 150 + 200, // Atraso após o header
         useNativeDriver: true,
       }),
       Animated.timing(translateYAnim, {
         toValue: 0,
         duration: 600,
-        delay: index * 200,
+        delay: index * 150 + 200,
         useNativeDriver: true,
       }),
     ]).start();
   }, []);
 
   const handlePress = () => {
+    // Animação de clique (feedback visual)
     Animated.sequence([
-      Animated.timing(scaleAnim, {
-        toValue: 0.95,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(scaleAnim, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]).start();
-    onPress();
+      Animated.timing(scaleAnim, { toValue: 0.95, duration: 100, useNativeDriver: true }),
+      Animated.timing(scaleAnim, { toValue: 1, duration: 150, useNativeDriver: true }),
+    ]).start(() => onPress());
   };
 
 
-
   return (
-    <Animated.View 
+    <Animated.View
       style={[
         styles.categoryCard,
         {
+          width: CARD_WIDTH,
           transform: [
             { scale: scaleAnim },
             { translateY: translateYAnim }
@@ -160,40 +107,34 @@ const CategoryCard = ({ item, onPress, index }) => {
         }
       ]}
     >
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.cardTouchable}
         onPress={handlePress}
-        activeOpacity={0.9}
+        activeOpacity={0.9} // Opacidade ativa ajustada para cards de imagem
       >
-        {/* Área da Imagem */}
-        <LinearGradient
-          colors={item.bgColor}
-          style={styles.imageContainer}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
-          <Image 
-            source={item.image}
-            style={styles.categoryImage}
-            resizeMode="cover"
-          />
-          
-          {/* Overlay sutil */}
-          <LinearGradient
-            colors={['transparent', 'rgba(0,0,0,0.05)']}
-            style={styles.imageOverlay}
-          />
-          
-          {/* Ícone da categoria */}
-          <View style={styles.categoryIconContainer}>
-            <Text style={styles.categoryIcon}>{item.icon}</Text>
-          </View>
-        </LinearGradient>
+        {/* Imagem de Fundo (Área Visual) */}
+        <Image 
+          source={{ uri: item.imageUrl }} 
+          style={styles.cardImage} 
+        />
         
-        {/* Informações da Categoria */}
-        <View style={styles.categoryInfo}>
-          <Text style={styles.categoryName}>{item.name}</Text>
-          <Text style={styles.categoryDescription}>{item.description}</Text>
+        {/* Overlay de Gradiente Escuro na parte inferior para garantir legibilidade do texto */}
+        <LinearGradient
+          colors={['transparent', 'rgba(0,0,0,0.5)', 'rgba(0,0,0,0.7)']}
+          style={styles.textOverlay}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+        />
+
+        {/* Informações da Categoria sobrepostas (Nome e Descrição) */}
+        <View style={styles.categoryInfoOverlay}>
+          <Text style={styles.categoryNameOverlay}>{item.name}</Text>
+          <Text style={styles.categoryDescriptionOverlay}>{item.description}</Text>
+        </View>
+
+        {/* Ícone da categoria em um círculo destacado (Mantido como "status" visual) */}
+        <View style={styles.categoryIconContainer}>
+          <Text style={styles.categoryIcon}>{item.icon}</Text>
         </View>
       </TouchableOpacity>
     </Animated.View>
@@ -202,6 +143,7 @@ const CategoryCard = ({ item, onPress, index }) => {
 
 // --- Tela Principal de Categorias ---
 const CategoriesScreen = () => {
+  const navigation = useNavigation();
   const headerAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -212,17 +154,21 @@ const CategoriesScreen = () => {
     }).start();
   }, []);
 
+  const navigateToCategory = (screenName) => {
+    navigation.navigate(screenName);
+  };
+
   return (
     <LinearGradient
-      colors={['#f9f9f9', '#f5f5f5']}
+      colors={['#ffffff', '#fcfcfc']}
       style={styles.container}
       start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
+      end={{ x: 0, y: 1 }}
     >
-      <StatusBar barStyle="dark-content" backgroundColor="#f9f9f9" />
-      
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+
       {/* Header/Título */}
-      <Animated.View 
+      <Animated.View
         style={[
           styles.header,
           {
@@ -236,31 +182,34 @@ const CategoriesScreen = () => {
           }
         ]}
       >
-        <View style={styles.titleContainerWhite}>
-          <Text style={styles.mainTitleWhite}>Navegue pelas</Text>
-          <Text style={styles.mainTitleWhite}>Categorias</Text>
-        </View>
-        <Text style={styles.subtitle}>
-          Descubra produtos incríveis para sua rotina de beleza
+        <Text style={styles.mainTitle}>
+          Navegue pelas
         </Text>
-        <View style={styles.divider} />
+        {/* Removido o negrito (**) conforme solicitação */}
+        <Text style={styles.subHeading}>
+          Nossas Categorias
+        </Text>
+        <Text style={styles.subtitle}>
+          Descubra a linha completa de produtos para sua rotina de beleza e bem-estar.
+        </Text>
       </Animated.View>
-      
+
       {/* Grid de Categorias */}
       <FlatList
         data={categories}
         renderItem={({ item, index }) => (
-          <CategoryCard 
-            item={item} 
+          <CategoryCard
+            item={item}
             index={index}
-            onPress={() => console.log(`Navegando para: ${item.name}`)}
+            onPress={() => navigateToCategory(item.screen)} // Implementa a navegação
           />
         )}
         keyExtractor={item => item.id}
         numColumns={2}
         contentContainerStyle={styles.gridContainer}
         showsVerticalScrollIndicator={false}
-        scrollEventThrottle={16}
+        // Adiciona um padding extra para não cobrir a Tab Bar
+        style={{ marginBottom: 90 }} 
       />
     </LinearGradient>
   );
@@ -270,128 +219,115 @@ const CategoriesScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#ffffff',
   },
   header: {
     alignItems: 'flex-start',
     paddingTop: 60,
-    paddingHorizontal: 20,
-    paddingBottom: 3,
-  },
-
-  titleContainerWhite: {
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-    alignItems: 'flex-start',
-    alignSelf: 'stretch',
-    marginBottom: 5,
+    paddingHorizontal: 30,
+    paddingBottom: 20,
+    backgroundColor: '#ffffff',
   },
   mainTitle: {
-    fontSize: 35,
-    fontWeight: '700',
-    color: '#fff',
-    textAlign: 'left',
+    fontSize: 24,
+    fontWeight: '400',
+    color: '#333',
     letterSpacing: -0.5,
-    lineHeight: 30,
   },
-  mainTitleWhite: {
-    fontSize: 36,
+  subHeading: {
+    fontSize: 38,
     fontWeight: '800',
-    color: '#ff86b5',
-    textAlign: 'left',
-    letterSpacing: -0.5,
+    color: "#ff86b5", // Cor ajustada para um visual mais neutro/profissional
     lineHeight: 40,
+    marginBottom: 10,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#666',
     textAlign: 'left',
     fontWeight: '400',
-    lineHeight: 22,
-    paddingHorizontal: 20,
-    marginBottom: 15,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#ff86b4d2',
-    width: '90%',
-    alignSelf: 'center',
-    marginBottom: 20,
-    opacity: 0.5,
   },
   gridContainer: {
-    paddingHorizontal: 20,
+    paddingHorizontal: CARD_PADDING,
     paddingBottom: 40,
+    justifyContent: 'space-between',
   },
+  // Estilo do Card com Imagem (novo visual)
   categoryCard: {
-    flex: 1,
-    maxWidth: (width - 60) / 2,
     backgroundColor: '#fff',
     borderRadius: 20,
-    margin: 10,
+    margin: CARD_MARGIN,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOpacity: 0.1, // Sombra sutil para efeito elevado
+    shadowRadius: 15,
+    elevation: 10,
     overflow: 'hidden',
+    height: 250, 
   },
   cardTouchable: {
     flex: 1,
   },
-  imageContainer: {
-    width: '100%',
-    height: 160,
-    position: 'relative',
-  },
-  categoryImage: {
+  cardImage: {
     width: '100%',
     height: '100%',
     position: 'absolute',
+    // O borderRadius será aplicado no container pai (categoryCard)
   },
-  imageOverlay: {
+  textOverlay: {
     position: 'absolute',
-    top: 0,
+    bottom: 0,
     left: 0,
     right: 0,
-    bottom: 0,
+    height: '70%', // Gradiente cobrindo a parte inferior
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
+  categoryInfoOverlay: {
+    position: 'absolute',
+    bottom: 15,
+    left: 15,
+    right: 15,
+    zIndex: 5, // Garante que o texto fique acima do gradiente
+  },
+  categoryNameOverlay: {
+    fontSize: 20,
+    fontWeight: '800', 
+    color: '#fff',
+    marginBottom: 4,
+    textShadowColor: 'rgba(0, 0, 0, 0.6)', // Sombra para o texto
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+  categoryDescriptionOverlay: {
+    fontSize: 13,
+    color: '#fff',
+    lineHeight: 18,
+    fontWeight: '500',
+    textShadowColor: 'rgba(0, 0, 0, 0.6)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+
+  // Estilos do Ícone de Status
   categoryIconContainer: {
     position: 'absolute',
-    top: 12,
-    right: 12,
-    width: 36,
-    height: 36,
+    top: 15,
+    right: 15,
+    width: 40,
+    height: 40,
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderRadius: 18,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.15,
     shadowRadius: 4,
-    elevation: 4,
   },
   categoryIcon: {
-    fontSize: 18,
-  },
-  categoryInfo: {
-    paddingHorizontal: 16,
-    paddingVertical: 20,
-    minHeight: 90,
-    justifyContent: 'space-between',
-  },
-  categoryName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
-    lineHeight: 22,
-  },
-  categoryDescription: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 20,
-    fontWeight: '400',
+    fontSize: 20,
   },
 });
 
