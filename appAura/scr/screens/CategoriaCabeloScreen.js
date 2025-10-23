@@ -37,7 +37,7 @@ const products = [
     originalPrice: 'R$45,00',
     price: 'R$36,96',
     rating: 4.5,
-    imageUrl: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.belezanaweb.com.br%2Fkit-beleza-na-web-pele-e-cabelo-4-produtos%2F&psig=AOvVaw0e9QcoUaHhP530n1iG3bRs&ust=1761303548175000&source=images&cd=vfe&opi=89978449&ved=2ahUKEwiAivWTlbqQAxUUBrkGHbf-AxcQjRx6BAgAEBo',
+    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:eco,w_1800,c_limit/e_trim/v1/imagens/product/KT001996/97821b67-49fa-46c2-9f23-271d27624134-kit-beleza-na-web-pele-e-cabelo-4-produtos.png',
     isFavorite: false,
   },
   {
@@ -46,7 +46,7 @@ const products = [
     originalPrice: 'R$99,90',
     price: 'R$79,90',
     rating: 4.9,
-    imageUrl: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.belezanaweb.com.br%2Fkit-beleza-na-web-pele-e-cabelo-6-produtos%2F&psig=AOvVaw3ZBvZNGJ-eDS9Y1pQehZXC&ust=1761303579999000&source=images&cd=vfe&opi=89978449&ved=2ahUKEwjPuIujlbqQAxWuN7kGHVcLDt8QjRx6BAgAEBo',
+    imageUrl: 'https://imgs.casasbahia.com.br/1557265984/1xg.jpg?imwidth=1000',
     isFavorite: true,
   },
   {
@@ -55,7 +55,7 @@ const products = [
     originalPrice: 'R$30,00',
     price: 'R$22,20',
     rating: 4.2,
-    imageUrl: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.casasbahia.com.br%2Fkit-beleza-na-web-pele-cabelo-3-produtos%2Fp%2F1557265984&psig=AOvVaw23pUb4d5IIxDdCfU5v0egI&ust=1761303598920000&source=images&cd=vfe&opi=89978449&ved=2ahUKEwi7po6slbqQAxVON7kGHWVxGG4QjRx6BAgAEBo',
+    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:eco,w_800/v1/imagens/product/KT005072/aef72423-ff19-4887-9599-d8c9cebe0ba9-kit-beleza-na-web-rosto-corpo-e-cabelo-2-produtos.png',
     isFavorite: false,
   },
   // Mais produtos para simular a rolagem
@@ -65,7 +65,7 @@ const products = [
     originalPrice: 'R$55,00',
     price: 'R$45,00',
     rating: 4.6,
-    imageUrl: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.casasbahia.com.br%2Fkit-beleza-na-web-pele-cabelo-3-produtos%2Fp%2F1557265984&psig=AOvVaw23pUb4d5IIxDdCfU5v0egI&ust=1761303598920000&source=images&cd=vfe&opi=89978449&ved=2ahUKEwi7po6slbqQAxVON7kGHWVxGG4QjRx6BAgAEBo',
+    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:best/v1/imagens/product/20057140/56ed4434-c20d-49a0-985b-8ad84ad8f39c-vichy-dercos-energy-shampoo-estimulante-400g.png',
     isFavorite: false,
   },
   {
@@ -74,7 +74,7 @@ const products = [
     originalPrice: 'R$65,00',
     price: 'R$59,99',
     rating: 4.7,
-    imageUrl: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.belezanaweb.com.br%2Fkit-beleza-na-web-pele-e-cabelo-4-produtos%2F&psig=AOvVaw0e9QcoUaHhP530n1iG3bRs&ust=1761303548175000&source=images&cd=vfe&opi=89978449&ved=2ahUKEwiAivWTlbqQAxUUBrkGHbf-AxcQjRx6BAgAEBo',
+    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:eco,w_1800,c_limit/e_trim/v1/imagens/product/KT001995/d6208853-ab54-426b-a9fd-fd0f9f88681c-kit-beleza-na-web-pele-e-cabelo-6-produtos.png',
     isFavorite: true,
   },
 ];

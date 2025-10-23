@@ -28,7 +28,7 @@ const products = [
     originalPrice: 'R$159,90',
     price: 'R$129,90',
     rating: 4.8,
-    imageUrl: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.belezanaweb.com.br%2Fkit-adcos-de-tratamento-facial-para-pele-oleosa-3-produtos%2F&psig=AOvVaw0zghSHVOZIFeyGjVB9AHHP&ust=1761303687569000&source=images&cd=vfe&opi=89978449&ved=2ahUKEwi7g7HWlbqQAxULjGEGHXn7BHwQjRx6BAgAEBo',
+    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:eco,w_800/v1/imagens/product/KT001951/f1ff084d-71bd-4394-a1a3-e9fc2a7c12af-kit-adcos-pele-fresca-e-saudavel-1-3-produtos.png',
     isFavorite: true,
   },
   {
@@ -37,7 +37,7 @@ const products = [
     originalPrice: 'R$45,00',
     price: 'R$36,96',
     rating: 4.5,
-    imageUrl: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.belezanaweb.com.br%2Fkit-adcos-pele-fresca-e-saudavel-2-3-produtos%2F&psig=AOvVaw2zpWJ4kvm9SUT3oZEql3f2&ust=1761303703547000&source=images&cd=vfe&opi=89978449&ved=2ahUKEwjmnYDelbqQAxWIOLkGHYg6F6EQjRx6BAgAEBo',
+    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:best/v1/imagens/products/73117/73117_c.png',
     isFavorite: false,
   },
   {
@@ -46,7 +46,7 @@ const products = [
     originalPrice: 'R$99,90',
     price: 'R$79,90',
     rating: 4.9,
-    imageUrl: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.belezanaweb.com.br%2Fkit-adcos-aqua-fluid-fps50-vitamina-c-15-2-produtos%2F&psig=AOvVaw0zIJR0gHUKPKX_55hpIn_e&ust=1761303731371000&source=images&cd=vfe&opi=89978449&ved=2ahUKEwjZuqLrlbqQAxV2N7kGHVKuFZsQjRx6BAgAEBo',
+    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:eco,w_800/v1/imagens/product/KT001959/b36366a2-922e-43a5-9c10-d2af9149ef49-kit-adcos-de-tratamento-facial-para-pele-oleosa-3-produtos.png',
     isFavorite: true,
   },
   {
@@ -55,7 +55,7 @@ const products = [
     originalPrice: 'R$30,00',
     price: 'R$22,20',
     rating: 4.2,
-    imageUrl: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.belezanawebpro.com.br%2Fkit-adcos-pele-fresca-e-saudavel-2-3-produtos%2F&psig=AOvVaw1-rAGYqOIcREoI4PLdb9Oe&ust=1761303753564000&source=images&cd=vfe&opi=89978449&ved=2ahUKEwinhO31lbqQAxXmObkGHSXyCDoQjRx6BAgAEBo',
+    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:eco,w_800/v1/imagens/product/80708/6078622c-e700-45ad-b1e2-d055d1784c49-80708-pai-67426-67433.png',
     isFavorite: false,
   },
   // Mais produtos para simular a rolagem
@@ -65,7 +65,7 @@ const products = [
     originalPrice: 'R$55,00',
     price: 'R$45,00',
     rating: 4.6,
-    imageUrl: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.belezanaweb.com.br%2Fkit-adcos-aqua-fluid-fps50-vitamina-c-15-2-produtos%2F&psig=AOvVaw0zIJR0gHUKPKX_55hpIn_e&ust=1761303731371000&source=images&cd=vfe&opi=89978449&ved=2ahUKEwjZuqLrlbqQAxV2N7kGHVKuFZsQjRx6BAgAEBo',
+    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:best/v1/imagens/products/20044545/20044545_a.png',
     isFavorite: false,
   },
   {
@@ -74,7 +74,7 @@ const products = [
     originalPrice: 'R$65,00',
     price: 'R$59,99',
     rating: 4.7,
-    imageUrl: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.belezanawebpro.com.br%2Fkit-adcos-essenciais-1-3-produtos%2F&psig=AOvVaw0zIJR0gHUKPKX_55hpIn_e&ust=1761303731371000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCICky9CXupADFQAAAAAdAAAAABAD',
+    imageUrl: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:best/v1/imagens/product/75051/d2a75134-7cc1-484c-9407-47eff91bc846-adcos-aqua-hidratacao-intensiva-serum-30ml.png',
     isFavorite: true,
   },
 ];
