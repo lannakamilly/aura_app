@@ -142,16 +142,35 @@ const ProductCard = ({ product }) => {
 };
 
 // 3. Card de Categoria
-const CategoryCard = ({ item }) => (
-  <TouchableOpacity style={styles.categoryCard}>
-    <View style={styles.categoryIconCircle}>
-      <Ionicons name={item.icon} size={28} color={MAIN_PINK} />
-    </View>
-    <Text style={styles.categoryName} numberOfLines={1}>
-      {item.name}
-    </Text>
-  </TouchableOpacity>
-);
+// ...existing code...
+// 3. Card de Categoria (com navegação)
+const CategoryCard = ({ item }) => {
+  const navigation = useNavigation();
+
+  const handlePress = () => {
+    const screenMap = {
+      "Skin Care": "CategoriaPele",
+      "Maquiagem": "CategoriaMaquiagem",
+      "Cabelo": "CategoriaCabelo",
+      "Perfume": "CategoriaPerfume",
+    };
+
+    const screenName = screenMap[item.name] || "CategoriaPeleScreen";
+    navigation.navigate(screenName);
+  };
+
+  return (
+    <TouchableOpacity style={styles.categoryCard} onPress={handlePress}>
+      <View style={styles.categoryIconCircle}>
+        <Ionicons name={item.icon} size={28} color={MAIN_PINK} />
+      </View>
+      <Text style={styles.categoryName} numberOfLines={1}>
+        {item.name}
+      </Text>
+    </TouchableOpacity>
+  );
+};
+// ...existing code...
 
 // --- COMPONENTE PRINCIPAL (HomeScreen) ---
 export default function HomeScreen() { 
