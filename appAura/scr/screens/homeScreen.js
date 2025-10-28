@@ -10,31 +10,26 @@ import {
   FlatList,
   Dimensions,
 } from "react-native";
-// IMPORTAÇÕES NOVAS/ATUALIZADAS
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { LinearGradient } from 'expo-linear-gradient'; // <-- IMPORTAÇÃO NECESSÁRIA
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width } = Dimensions.get("window");
-// Largura do banner para FlatList
 const BANNER_WIDTH = width - 40;
-const MAIN_PINK = "#ff86b4"; // Rosa Principal Suave (Ajustado para o tom do card)
-const LIGHT_PINK = "#FDEFF1"; // Rosa muito claro para fundo de topo
-const VERY_LIGHT_PINK = "#fce3f7"; // Rosa usado no gradiente do card
-const LIGHT_BG = "#fff"; // Fundo Principal Branco
+const MAIN_PINK = "#ff86b4";
+const LIGHT_PINK = "#FDEFF1";
+const VERY_LIGHT_PINK = "#fce3f7";
+const LIGHT_BG = "#fff";
 
-// Largura do card para 2 colunas: (Largura da tela - padding*2 - margem única) / 2
 const HORIZONTAL_PADDING = 20;
 const PRODUCT_CARD_MARGIN = 20;
 const PRODUCT_CARD_WIDTH = (width - HORIZONTAL_PADDING * 2 - PRODUCT_CARD_MARGIN) / 2;
 
-// --- DADOS MOCK EXPANDIDOS ---
-// ... (Dados de categories, promotionBanners, products permanecem iguais) ...
 const categories = [
-  { name: "Skin Care", icon: "eyedrop-outline" },
-  { name: "Maquiagem", icon: "color-palette-outline" },
-  { name: "Cabelo", icon: "cut-outline" },
-  { name: "Perfume", icon: "water-outline" },
+  { name: "Skin Care", image: require('../assets/skin.jpg') },
+  { name: "Maquiagem", image: require('../assets/makee.jpg') },
+  { name: "Cabelo", image: require('../assets/haiir.jpg') },
+  { name: "Perfume", image: require('../assets/perff.jpg') },
 ];
 
 const promotionBanners = [
@@ -69,9 +64,6 @@ const products = [
   { id: 8, name: "Sunscreen SPF50", price: "$35.00", newPrice: "$29.90", image: require('../assets/8.png'), rating: 4.1 },
 ];
 
-// --- COMPONENTES AUXILIARES ---
-
-// 1. Banner de Carrossel (Inalterado)
 const PromotionBanner = ({ item }) => (
   <TouchableOpacity style={bannerStyles.bannerContainer}>
     <Image
@@ -89,16 +81,14 @@ const PromotionBanner = ({ item }) => (
   </TouchableOpacity>
 );
 
-// 2. Card de Produto (AGORA COM ESTILO REPLICADO)
 const ProductCard = ({ product }) => {
-  // Use 'false' como estado inicial se não houver dados de favorito
-  const [isFavorite, setIsFavorite] = useState(false); 
+  const [isFavorite, setIsFavorite] = useState(false);
   const navigation = useNavigation();
 
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
   };
-  
+
   const handleCardPress = () => {
     const screenName = product.id === 1 ? 'Produto' : `Produto${product.id}`;
     navigation.navigate(screenName);
@@ -106,10 +96,9 @@ const ProductCard = ({ product }) => {
 
   return (
     <TouchableOpacity style={styles.productCard} onPress={handleCardPress}>
-      {/* 1. Área da Imagem com Gradiente Rosa Suave */}
       <View style={styles.productImageBackground}>
         <LinearGradient
-          colors={[VERY_LIGHT_PINK, '#fff']} // Gradiente do rosa claro para branco
+          colors={[VERY_LIGHT_PINK, '#fff']}
           style={styles.gradientOverlay}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
@@ -122,32 +111,27 @@ const ProductCard = ({ product }) => {
         </LinearGradient>
       </View>
 
-      {/* 2. Botão de Favorito (Top Right) - Replicado o visual da imagem */}
       <TouchableOpacity onPress={toggleFavorite} style={styles.favoriteButton}>
         <Ionicons
-          name={isFavorite ? 'heart' : 'heart'} // Coração sempre preenchido na ref
+          name={isFavorite ? 'heart' : 'heart'}
           size={22}
-          color={MAIN_PINK} 
+          color={MAIN_PINK}
         />
       </TouchableOpacity>
 
-      {/* 3. Detalhes do Produto (Fundo Branco) */}
       <View style={styles.productDetails}>
-        <Text style={styles.productName} numberOfLines={2}>{product.name}</Text>
+        {/* ALTERADO: Removido numberOfLines para permitir que o texto ocupe mais linhas */}
+        <Text style={styles.productName}>{product.name}</Text>
 
         <View style={styles.priceContainer}>
-          {/* Preço Original Riscado */}
           <Text style={styles.originalPrice}>
             {product.price}
           </Text>
-          {/* Preço Promocional em Destaque */}
           <Text style={styles.currentPrice}>{product.newPrice}</Text>
         </View>
 
-        {/* Avaliação por Estrelas */}
         <View style={styles.ratingContainer}>
-          {/* Estrela Amarela sólida (como na referência) */}
-          <Ionicons name="star" size={16} color="#FFD700" /> 
+          <Ionicons name="star" size={16} color="#FFD700" />
           <Text style={styles.ratingText}>{product.rating ? product.rating.toFixed(1) : '4.5'}</Text>
         </View>
       </View>
@@ -155,7 +139,6 @@ const ProductCard = ({ product }) => {
   );
 };
 
-// 3. Card de Categoria (com navegação) - Inalterado
 const CategoryCard = ({ item }) => {
   const navigation = useNavigation();
 
@@ -174,23 +157,27 @@ const CategoryCard = ({ item }) => {
   return (
     <TouchableOpacity style={styles.categoryCard} onPress={handlePress}>
       <View style={styles.categoryIconCircle}>
-        <Ionicons name={item.icon} size={28} color={MAIN_PINK} />
+        <Image
+          source={item.image}
+          style={styles.categoryImage}
+          resizeMode="cover"
+        />
       </View>
-      <Text style={styles.categoryName} numberOfLines={1}>
+      {/* ALTERADO: Removido numberOfLines para permitir que o texto ocupe mais linhas */}
+      <Text style={styles.categoryName}>
         {item.name}
       </Text>
     </TouchableOpacity>
   );
 };
 
-// --- COMPONENTE PRINCIPAL (HomeScreen) ---
-export default function HomeScreen() { 
+export default function HomeScreen() {
   const navigation = useNavigation();
   const [searchText, setSearchText] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
 
   const handleFavoritesPress = () => {
-      navigation.navigate('Favoritos'); 
+    navigation.navigate('Favoritos');
   };
 
   const onScroll = (event) => {
@@ -206,15 +193,11 @@ export default function HomeScreen() {
     <ScrollView
       style={styles.container}
       showsVerticalScrollIndicator={false}
-      // Mantém o espaço para a navegação por abas (Lembrete: 2025-10-21)
       contentContainerStyle={styles.scrollViewContent}
     >
-      {/* Fundo Rosa Suave no topo */}
       <View style={styles.topBackground} />
 
-      {/* 1. Barra de Pesquisa e Filtro (Topo) */}
       <View style={styles.searchBarContainer}>
-        {/* Simulação de "Localização" como na imagem de referência */}
         <View style={styles.locationContainer}>
           <Ionicons name="location-sharp" size={18} color="#000" />
           <Text style={styles.locationText}>São Paulo, BR </Text>
@@ -238,16 +221,14 @@ export default function HomeScreen() {
             onChangeText={setSearchText}
           />
         </View>
-        {/* Botão de Filtro Rosa com Ícone de Coração */}
-        <TouchableOpacity 
-          style={styles.filterButton} 
-          onPress={handleFavoritesPress} 
+        <TouchableOpacity
+          style={styles.filterButton}
+          onPress={handleFavoritesPress}
         >
           <Ionicons name="heart-outline" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
 
-      {/* 2. Carrossel de Promoções */}
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Ofertas Especiais</Text>
         <TouchableOpacity>
@@ -267,7 +248,6 @@ export default function HomeScreen() {
           contentContainerStyle={styles.carouselList}
           onScroll={onScroll}
         />
-        {/* Indicadores do Carrossel */}
         <View style={styles.indicatorContainer}>
           {promotionBanners.map((_, index) => (
             <View
@@ -283,7 +263,6 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* 3. Categorias */}
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Categorias</Text>
         <TouchableOpacity>
@@ -299,7 +278,6 @@ export default function HomeScreen() {
         contentContainerStyle={styles.categoryList}
       />
 
-      {/* 4. Lista de Produtos (Recomendados) */}
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Recomendado Para Você</Text>
         <TouchableOpacity>
@@ -308,7 +286,6 @@ export default function HomeScreen() {
       </View>
       <View style={styles.productsGrid}>
         {products.map((item) => (
-          // Garante que o ProductCard use a largura correta para duas colunas
           <ProductCard key={item.id} product={item} />
         ))}
       </View>
@@ -316,7 +293,6 @@ export default function HomeScreen() {
   );
 }
 
-// --- ESTILOS DO CARROSSEL DE PROMOÇÃO (Inalterados) ---
 const bannerStyles = StyleSheet.create({
   bannerContainer: {
     width: BANNER_WIDTH,
@@ -370,18 +346,15 @@ const bannerStyles = StyleSheet.create({
   },
 });
 
-// --- ESTILOS GERAIS E CARTÕES DE PRODUTO/CATEGORIA (ATUALIZADOS) ---
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: LIGHT_BG,
   },
-  // IMPORTANTE: Espaço para o Tab Bar (Lembrete: 2025-10-21)
   scrollViewContent: {
     paddingBottom: 100,
   },
 
-  // Fundo Rosa Suave no Topo
   topBackground: {
     position: "absolute",
     top: 0,
@@ -393,7 +366,6 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 30,
   },
 
-  // Topo (Localização)
   searchBarContainer: {
     flexDirection: "row",
     justifyContent: "flex-start",
@@ -417,7 +389,6 @@ const styles = StyleSheet.create({
     color: "#000",
   },
 
-  // Linha de Pesquisa e Filtro
   searchFilterRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -449,7 +420,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#000",
   },
-  // Botão de filtro com coração
   filterButton: {
     marginLeft: 15,
     backgroundColor: MAIN_PINK,
@@ -462,7 +432,6 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
 
-  // Cabeçalho de Seção
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -482,7 +451,6 @@ const styles = StyleSheet.create({
     color: MAIN_PINK,
   },
 
-  // Carrossel de Promoções
   carouselContainer: {
     marginBottom: 30,
   },
@@ -508,15 +476,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#ccc",
   },
 
-  // Lista de Categorias
   categoryList: {
     paddingHorizontal: HORIZONTAL_PADDING,
     marginBottom: 30,
-    justifyContent: "space-between",
+    // Removido justifyContent: "space-between" para não esticar demais se tiver poucos itens
   },
   categoryCard: {
     alignItems: "center",
-    width: width / 5,
+    width: width / 5, // Isso ainda pode limitar o espaço para o nome
     marginRight: 15,
   },
   categoryIconCircle: {
@@ -527,42 +494,46 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 8,
+    overflow: 'hidden',
+  },
+  categoryImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
   categoryName: {
     fontSize: 12,
     fontWeight: "600",
     color: "#555",
     textAlign: "center",
+    // REMOVIDO: numberOfLines para permitir que o texto se quebre em várias linhas
+    // ou ocupe o espaço necessário. Se quiser limitar, use numberOfLines={2} por exemplo.
+    // minHeight: 28, // Adicione um minHeight se precisar de espaço para 2 linhas.
   },
 
-  // Lista de Produtos (Grade 2x2)
   productsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
     paddingHorizontal: HORIZONTAL_PADDING,
   },
-  
-  // =======================================================
-  // --- ESTILOS DO CARD DE PRODUTO (REPLICADOS) ---
-  // =======================================================
+
   productCard: {
-    width: PRODUCT_CARD_WIDTH, // Largura calculada
+    width: PRODUCT_CARD_WIDTH,
     marginBottom: PRODUCT_CARD_MARGIN,
     backgroundColor: '#fff',
-    borderRadius: 20, // Borda super arredondada (igual à ref)
-    // Sombra suave
+    borderRadius: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.05, 
+    shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 8,
     position: 'relative',
-    overflow: 'hidden', // Importante para o card manter o gradiente dentro
+    overflow: 'hidden',
   },
   productImageBackground: {
     width: '100%',
-    height: 160, // Altura da imagem para o HomeScreen
+    height: 160,
   },
   gradientOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -570,9 +541,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   productImage: {
-    width: '80%', 
+    width: '80%',
     height: '80%',
-    // Sem border radius aqui, pois o gradiente que faz o topo do card
   },
   favoriteButton: {
     position: 'absolute',
@@ -584,7 +554,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
-    // Sombra do botão
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -598,11 +567,14 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   productName: {
-    fontSize: 18, // Aumentado para o estilo da ref
-    fontWeight: '800', 
+    fontSize: 18,
+    fontWeight: '800',
     color: '#333',
     marginBottom: 10,
-    minHeight: 45,
+    // ALTERADO: Aumentado o minHeight e removido numberOfLines
+    minHeight: 50, // Permite que o texto ocupe mais espaço verticalmente
+    // Se ainda quiser limitar a 2 linhas, adicione: numberOfLines={2},
+    // mas certifique-se que o minHeight seja suficiente para 2 linhas.
   },
   priceContainer: {
     flexDirection: 'row',
@@ -611,7 +583,7 @@ const styles = StyleSheet.create({
   },
   originalPrice: {
     fontSize: 15,
-    color: '#a1a1aa', // Cinza médio
+    color: '#a1a1aa',
     textDecorationLine: 'line-through',
     marginRight: 10,
     fontWeight: '500',
@@ -619,14 +591,14 @@ const styles = StyleSheet.create({
   currentPrice: {
     fontSize: 18,
     fontWeight: '800',
-    color: MAIN_PINK, // Usa o MAIN_PINK ajustado (#ff86b4)
+    color: MAIN_PINK,
   },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   ratingText: {
-    fontSize: 15, // Aumentado para o estilo da ref
+    fontSize: 15,
     color: '#333',
     marginLeft: 5,
     fontWeight: '600',
