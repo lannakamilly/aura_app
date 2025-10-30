@@ -25,11 +25,14 @@ const HORIZONTAL_PADDING = 20;
 const PRODUCT_CARD_MARGIN = 20;
 const PRODUCT_CARD_WIDTH = (width - HORIZONTAL_PADDING * 2 - PRODUCT_CARD_MARGIN) / 2;
 
+// 1. IMPORTAÇÃO DA LOGO
+const LOGO_IMAGE = require('../assets/auralogo.png'); 
+
 const categories = [
-  { name: "Skin Care", image: require('../assets/skin.jpg') },
-  { name: "Maquiagem", image: require('../assets/makee.jpg') },
-  { name: "Cabelo", image: require('../assets/haiir.jpg') },
-  { name: "Perfume", image: require('../assets/perff.jpg') },
+  { name: "Skin Care", image: require('../assets/cate_skin.png') },
+  { name: "Maquiagem", image: require('../assets/cate_make.png') },
+  { name: "Cabelo", image: require('../assets/cate_cabelo.png') },
+  { name: "Perfume", image: require('../assets/cate_perfume.png') },
 ];
 
 const promotionBanners = [
@@ -37,31 +40,31 @@ const promotionBanners = [
     id: 1,
     title: "Oferta de Outono",
     subtitle: "Até 30% OFF em Maquiagem.",
-    backgroundImage: "https://i.pinimg.com/736x/e0/65/66/e065664a9f17c9a6af8996c89222c9cf.jpg",
+    backgroundImage: "https://i.pinimg.com/736x/41/b5/27/41b527efe61cae9e5ede5b254cc5acc9.jpg",
   },
   {
     id: 2,
     title: "Dia da Beleza",
     subtitle: "Frete Grátis acima de $150.",
-    backgroundImage: "https://i.pinimg.com/1200x/59/1b/d5/591bd5d4fce1c74521b01f09e8ecd05c.jpg",
+    backgroundImage: "https://i.pinimg.com/1200x/74/b6/81/74b681aaf4b8510f902aa4ab9d308445.jpg",
   },
   {
     id: 3,
     title: "Lançamento Exclusivo",
     subtitle: "Novas coleções de Outono/Inverno.",
-    backgroundImage: "https://i.pinimg.com/1200x/81/45/8c/81458ce390f01b0f8a9e7e8f7ec5b90a.jpg",
+    backgroundImage: "https://i.pinimg.com/1200x/72/11/63/7211633244957d3b93a8f8679205c4af.jpg",
   },
 ];
 
 const products = [
-  { id: 1, name: "Gloss Fran By Franciny", price: "R$65,90", newPrice: "R$59,67", image: require('../assets/prod.png'), rating: 4.8 },
-  { id: 2, name: "Casual T-Shirt", price: "$113.00", newPrice: "$85.00", image: require('../assets/2.png'), rating: 4.5 },
-  { id: 3, name: "High-Waist Jeans", price: "$199.00", newPrice: "$149.00", image: require('../assets/3.png'), rating: 4.9 },
-  { id: 4, name: "Mineral Primer", price: "$44.90", newPrice: "$39.90", image: require('../assets/4.png'), rating: 4.2 },
-  { id: 5, name: "Silk Scarf", price: "$55.00", newPrice: "$45.00", image: require('../assets/5.png'), rating: 4.6 },
-  { id: 6, name: "Luxury Handbag", price: "$299.00", newPrice: "$250.00", image: require('../assets/6.png'), rating: 4.7 },
-  { id: 7, name: "Lipstick Set", price: "$79.00", newPrice: "$65.00", image: require('../assets/7.png'), rating: 4.3 },
-  { id: 8, name: "Sunscreen SPF50", price: "$35.00", newPrice: "$29.90", image: require('../assets/8.png'), rating: 4.1 },
+  { id: 1, name: "Gloss Fran By Franciny", newPrice: "R$59,67", image: require('../assets/prod.png'), rating: 4.8 },
+  { id: 2, name: "Casual T-Shirt", newPrice: "$85.00", image: require('../assets/2.png'), rating: 4.5 },
+  { id: 3, name: "High-Waist Jeans", newPrice: "$149.00", image: require('../assets/3.png'), rating: 4.9 },
+  { id: 4, name: "Mineral Primer", newPrice: "$39.90", image: require('../assets/4.png'), rating: 4.2 },
+  { id: 5, name: "Silk Scarf", newPrice: "$45.00", image: require('../assets/5.png'), rating: 4.6 },
+  { id: 6, name: "Luxury Handbag",newPrice: "$250.00", image: require('../assets/6.png'), rating: 4.7 },
+  { id: 7, name: "Lipstick Set", newPrice: "$65.00", image: require('../assets/7.png'), rating: 4.3 },
+  { id: 8, name: "Sunscreen SPF50", newPrice: "$29.90", image: require('../assets/8.png'), rating: 4.1 },
 ];
 
 const PromotionBanner = ({ item }) => (
@@ -131,7 +134,7 @@ const ProductCard = ({ product }) => {
         </View>
 
         <View style={styles.ratingContainer}>
-          <Ionicons name="star" size={16} color="#FFD700" />
+          <Ionicons name="star" size={16} color="#000000ff" />
           <Text style={styles.ratingText}>{product.rating ? product.rating.toFixed(1) : '4.5'}</Text>
         </View>
       </View>
@@ -189,6 +192,8 @@ export default function HomeScreen() {
     }
   };
 
+  // Usando a instrução salva: o paddingBottom: 100 no scrollViewContent já está reservando o espaço para a tab navigation.
+
   return (
     <ScrollView
       style={styles.container}
@@ -197,12 +202,13 @@ export default function HomeScreen() {
     >
       <View style={styles.topBackground} />
 
+      {/* MODIFICADO: searchBarContainer agora usa justifyContent: 'center' */}
       <View style={styles.searchBarContainer}>
-        <View style={styles.locationContainer}>
-          <Ionicons name="location-sharp" size={18} color="#000" />
-          <Text style={styles.locationText}>São Paulo, BR </Text>
-          <Ionicons name="chevron-down-outline" size={14} color="#000" />
-        </View>
+        <Image
+          source={LOGO_IMAGE}
+          style={styles.logoImage}
+          resizeMode="contain"
+        />
       </View>
 
       <View style={styles.searchFilterRow}>
@@ -351,8 +357,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: LIGHT_BG,
   },
+  // O 'paddingBottom: 100' está reservando espaço para a tab navigation, conforme sua instrução salva.
   scrollViewContent: {
-    paddingBottom: 100,
+    paddingBottom: 100, 
   },
 
   topBackground: {
@@ -360,7 +367,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 160,
+    height: 175,
     backgroundColor: LIGHT_PINK,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
@@ -368,11 +375,21 @@ const styles = StyleSheet.create({
 
   searchBarContainer: {
     flexDirection: "row",
-    justifyContent: "flex-start",
+    // CHAVE DA ALTERAÇÃO: Centraliza o conteúdo (a Logo) no eixo principal (horizontal)
+    justifyContent: "center", 
     alignItems: "center",
     paddingHorizontal: HORIZONTAL_PADDING,
     paddingTop: 50,
   },
+  
+  // ESTILO DA LOGO: Garantindo que ela não ocupe toda a largura
+  logoImage: {
+    width: 140, 
+    height: 50, 
+    resizeMode: 'contain',
+  },
+
+  // Estilos de localização removidos/não usados:
   locationContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -388,6 +405,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#000",
   },
+  // Fim dos estilos de localização
 
   searchFilterRow: {
     flexDirection: "row",
@@ -579,7 +597,6 @@ const styles = StyleSheet.create({
   priceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
   },
   originalPrice: {
     fontSize: 15,

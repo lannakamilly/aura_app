@@ -104,12 +104,7 @@ export default function FavoritosScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#333" />
-        </TouchableOpacity>
-        <Text style={styles.title}>Favoritos</Text>
-      </View>
+     
       
       <Text style={styles.favoriteCount}>Meus Favoritos ({favoriteItems.length})</Text>
 

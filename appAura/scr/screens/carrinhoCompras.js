@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 // --- CONFIGURAÇÃO DE ESTILO E CORES ---
 const PRIMARY_PINK = '#ff86b5'; 
-const ACCENT_RED = '#DC143C'; // Usado para remoção
+const ACCENT_RED = '#000000ff'; // Usado para remoção
 const SOFT_PINK = '#FFF0F5'; 
 const TEXT_COLOR = '#111827'; 
 const SECONDARY_TEXT_COLOR = '#6B7280'; 
