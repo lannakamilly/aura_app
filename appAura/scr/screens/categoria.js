@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,69 +12,73 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'; // Adicionei MaterialCommunityIcons para variedade
 
-// --- Paleta de Cores Profissional ---
+// --- Paleta de Cores Profissional Aprimorada ---
 const COLORS = {
-  primary: '#ff86b4',
-  secondary: '#F5E6E8',
-  textDark: '#333333',
+  primary: '#ff86b4', // Rosa Choque/Principal (Mais vibrante)
+  secondary: '#F5E6E8', // Fundo Suave
+  textDark: '#2C2C2C', // Preto mais suave
   textLight: '#ffffff',
-  background: '#fcfcfc',
-  shadow: 'rgba(91, 79, 140, 0.3)',
-  accent: '#FFA5C0',
-  // Novo tom para o banner, se necessário
+  background: '#f9f9f9', // Fundo mais limpo
+  shadow: 'rgba(91, 79, 140, 0.4)', // Sombra mais forte
+  accent: '#ec7ca7ff', // Rosa claro de realce
   darkOverlay: 'rgba(0, 0, 0, 0.4)',
+  cardPink: 'rgba(255, 105, 180, 0.2)', // Rosa sutil para o gradiente do card
 };
 
 // --- Importação das Imagens Locais ---
+// *** ATENÇÃO: Mantenha os caminhos corretos para seus assets ***
 const images = {
-    cabelo: require('../assets/cate_cabelo.png'),
-  pele: require('../assets/cate_skin.png'),
+  cabelo: require('../assets/cate_cabelo.png'), 
+  pele: require('../assets/cate_skin.png'), 
   maquiagem: require('../assets/cate_make.png'),
   perfume: require('../assets/cate_perfume.png'),
 };
 
 const { width } = Dimensions.get('window');
-const CARD_PADDING = 20;
-const CARD_MARGIN = 10;
-const CARD_WIDTH = (width - CARD_PADDING * 2 - CARD_MARGIN * 2) / 2;
+const SPACING = 20;
+// Dimensões do Card para o Carrossel (Mais estreito, mais alto: foco no visual)
+const CARD_WIDTH = width * 0.70; // 70% da tela
+const CARD_HEIGHT = CARD_WIDTH * 1.5; // Mais alto
+const LIST_ITEM_SIZE = CARD_WIDTH + SPACING; 
+
 // *** Altura da Tab Bar Fixa: 90px (Conforme sua solicitação anterior) ***
-const TAB_BAR_HEIGHT = 90;
+const TAB_BAR_HEIGHT = 90; 
 
 // --- Dados das 4 Categorias ---
 const categories = [
   {
     id: '1',
     name: 'Cuidados Capilares',
-   
+    description: 'Transforme seus fios', 
     screen: 'CategoriaCabelo',
     assetImage: images.cabelo,
   },
   {
     id: '2',
     name: 'Essenciais de Skincare',
-   
+    description: 'Pele radiante e saudável', 
     screen: 'CategoriaPele',
     assetImage: images.pele,
   },
   {
     id: '3',
     name: 'Coleção Maquiagem',
-    
+    description: 'Beleza e autoexpressão', 
     screen: 'CategoriaMaquiagem',
     assetImage: images.maquiagem,
   },
   {
     id: '4',
     name: 'Perfumaria Fina',
-    
+    description: 'Sua assinatura olfativa', 
     screen: 'CategoriaPerfume',
     assetImage: images.perfume,
   },
 ];
 
-// --- NOVO COMPONENTE: Banner Promocional (URL) ---
+// --- COMPONENTE: Banner Promocional (Aparência aprimorada) ---
 const PromotionalBanner = ({ imageUrl, title, subtitle, onPress }) => {
     return (
         <TouchableOpacity 
@@ -83,10 +87,9 @@ const PromotionalBanner = ({ imageUrl, title, subtitle, onPress }) => {
             activeOpacity={0.8}
         >
             <Image
-                source={{ uri: imageUrl }} // Usando URL de imagem
+                source={{ uri: imageUrl }} 
                 style={styles.bannerImage}
             />
-            {/* Overlay Escuro para Legibilidade do Texto */}
             <View style={styles.bannerOverlay} />
 
             <View style={styles.bannerTextContainer}>
@@ -94,7 +97,7 @@ const PromotionalBanner = ({ imageUrl, title, subtitle, onPress }) => {
                 <Text style={styles.bannerSubtitle}>{subtitle}</Text>
                 <View style={styles.bannerCTA}>
                     <Text style={styles.bannerCTAText}>
-                        Compre Agora
+                        Ver ofertas
                     </Text>
                     <Ionicons name="arrow-forward" size={16} color={COLORS.textLight} />
                 </View>
@@ -103,89 +106,87 @@ const PromotionalBanner = ({ imageUrl, title, subtitle, onPress }) => {
     );
 };
 
-// --- Componente Card de Categoria (Mantido) ---
-const CategoryCard = ({ item, onPress, index }) => {
-    // ... (código do CategoryCard inalterado) ...
-    const scaleAnim = useRef(new Animated.Value(0)).current;
-    const translateYAnim = useRef(new Animated.Value(50)).current;
+// --- Componente Card de Categoria (Carrossel com efeito de profundidade) ---
+const CategoryCard = React.memo(({ item, index, scrollX, onPress }) => {
+  const inputRange = [
+    (index - 1) * LIST_ITEM_SIZE,
+    index * LIST_ITEM_SIZE,
+    (index + 1) * LIST_ITEM_SIZE,
+  ];
 
-    useEffect(() => {
-        Animated.parallel([
-            Animated.timing(scaleAnim, {
-                toValue: 1,
-                duration: 800,
-                delay: index * 120 + 300,
-                useNativeDriver: true,
-            }),
-            Animated.timing(translateYAnim, {
-                toValue: 0,
-                duration: 800,
-                delay: index * 120 + 300,
-                useNativeDriver: true,
-            }),
-        ]).start();
-    }, []);
+  // Efeito de escala mais sutil para um look mais suave
+  const scale = scrollX.interpolate({
+    inputRange,
+    outputRange: [0.9, 1, 0.9],
+    extrapolate: 'clamp',
+  });
 
-    const handlePress = () => {
-        Animated.sequence([
-            Animated.timing(scaleAnim, { toValue: 0.97, duration: 150, useNativeDriver: true }),
-            Animated.timing(scaleAnim, { toValue: 1, duration: 200, useNativeDriver: true }),
-        ]).start(() => onPress());
-    };
+  // Efeito de opacidade para focar no item central
+  const opacity = scrollX.interpolate({
+    inputRange,
+    outputRange: [0.7, 1, 0.7],
+    extrapolate: 'clamp',
+  });
 
-    return (
-        <Animated.View
-            style={[
-                styles.categoryCard,
-                {
-                    width: CARD_WIDTH,
-                    transform: [
-                        { scale: scaleAnim },
-                        { translateY: translateYAnim }
-                    ]
-                }
-            ]}
-        >
-            <TouchableOpacity
-                style={styles.cardTouchable}
-                onPress={handlePress}
-                activeOpacity={0.9}
-            >
-                <Image
-                    source={item.assetImage}
-                    style={styles.cardImage}
-                />
-                <LinearGradient
-                    colors={['transparent', 'rgba(0,0,0,0.4)', COLORS.primary]}
-                    style={styles.textOverlay}
-                    start={{ x: 0, y: 0.4 }}
-                    end={{ x: 0, y: 1 }}
-                />
+  return (
+    <Animated.View
+      style={[
+        styles.carouselCard,
+        {
+          opacity,
+          transform: [{ scale }],
+        },
+      ]}
+    >
+      <TouchableOpacity
+        style={styles.cardTouchable}
+        onPress={onPress}
+        activeOpacity={0.95}
+      >
+        {/* Imagem de Fundo (Asset) */}
+        <Image
+          source={item.assetImage}
+          style={styles.carouselCardImage}
+        />
+        
+        {/* Gradiente sutil por cima da imagem, do claro para o escuro */}
+        <LinearGradient
+          colors={['transparent', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.85)']}
+          style={styles.textOverlay}
+          locations={[0.4, 0.8, 1]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+        />
 
-                <View style={styles.categoryInfoOverlay}>
-                    <Text style={styles.categoryNameOverlay}>{item.name}</Text>
-                    <Text style={styles.categoryDescriptionOverlay}>{item.description}</Text>
-                    <View style={styles.callToActionContainer}>
-                        <Text style={styles.callToActionText}>
-                            Ver Coleção
-                        </Text>
-                        <Ionicons name="arrow-forward-circle" size={18} color={COLORS.textLight} />
-                    </View>
-                </View>
-            </TouchableOpacity>
-        </Animated.View>
-    );
-};
+        {/* Informações da Categoria */}
+        <View style={styles.categoryInfoOverlay}>
+          <Text style={styles.categorySubTitle}>
+            {item.description}
+          </Text>
+          <Text style={styles.categoryNameOverlay}>{item.name}</Text>
+          <View style={styles.callToActionContainer}>
+            <Text style={styles.callToActionText}>
+              Ver Coleção
+            </Text>
+            <MaterialCommunityIcons name="arrow-right-circle" size={20} color={COLORS.primary} /> 
+          </View>
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+});
 
 // --- Tela Principal de Categorias ---
 const CategoriesScreen = () => {
   const navigation = useNavigation();
+  const scrollX = useRef(new Animated.Value(0)).current; 
   const headerAnim = useRef(new Animated.Value(0)).current;
 
-  // URL DE EXEMPLO PARA O BANNER (Substitua por sua imagem!)
+  // URL DE EXEMPLO PARA O BANNER
   const BANNER_IMAGE_URL = 'https://i.pinimg.com/1200x/09/c2/7f/09c27f847d533295bae6274dcaffaf41.jpg'; 
 
   useEffect(() => {
+    // Animação de entrada do Header
     Animated.timing(headerAnim, {
       toValue: 1,
       duration: 1000,
@@ -196,26 +197,29 @@ const CategoriesScreen = () => {
   const navigateToCategory = (screenName) => {
     navigation.navigate(screenName);
   };
-  
+
   const handleBannerPress = () => {
-      // Lógica de navegação ou ação do banner
-      console.log('Banner Pressionado! Levar para Ofertas Especiais...');
-      // navigation.navigate('OfertasEspeciais');
+    console.log('Banner Pressionado! Levar para Ofertas Especiais...');
   };
 
-  // Renderiza o Banner e o Título antes do Grid
   const renderListHeader = () => (
-      <View>
-          <PromotionalBanner
-              imageUrl={BANNER_IMAGE_URL}
-              title="Oferta da Semana"
-              subtitle="Até 40% OFF em toda a linha de Skincare."
-              onPress={handleBannerPress}
-          />
-          <Text style={styles.sectionTitle}>
-              Explorar Categorias
-          </Text>
-      </View>
+    <View style={styles.listHeaderPadding}>
+      <PromotionalBanner
+        imageUrl={BANNER_IMAGE_URL}
+        title="Oferta da Semana"
+        subtitle="Até 40% OFF em toda a linha de Skincare."
+        onPress={handleBannerPress}
+      />
+      {/* Título da seção principal - abaixo do banner */}
+      <Text style={styles.sectionTitle}>
+        <Ionicons name="sparkles-outline" size={24} color={COLORS.primary} /> Explore as Coleções
+      </Text>
+    </View>
+  );
+
+  const renderListFooter = () => (
+      // *** COMPENSAÇÃO DA TAB BAR (CONFORME SOLICITADO) ***
+      <View style={{ height: 20 + TAB_BAR_HEIGHT }} /> 
   );
 
   return (
@@ -226,8 +230,8 @@ const CategoriesScreen = () => {
       <LinearGradient
         colors={[COLORS.primary, COLORS.accent]}
         style={styles.headerContainer}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+        start={{ x: 0, y: 0.1 }}
+        end={{ x: 1, y: 0.9 }}
       >
         <Animated.View
           style={[
@@ -244,38 +248,60 @@ const CategoriesScreen = () => {
           ]}
         >
           <Text style={styles.subHeading}>
-            Descubra Nossas
+           
           </Text>
           <Text style={styles.subHeadingBold}>
             Coleções Premium
           </Text>
           <Text style={styles.subtitle}>
-            A beleza começa aqui. Encontre produtos exclusivos para sua rotina.
+            Encontre sua rotina perfeita.
           </Text>
         </Animated.View>
       </LinearGradient>
-
-      {/* Grid de Categorias com o Banner no topo */}
+      
+      {/* FlatList principal: Banner, Título da Seção e Carrossel */}
       <FlatList
-        data={categories}
-        renderItem={({ item, index }) => (
-          <CategoryCard
-            item={item}
-            index={index}
-            onPress={() => navigateToCategory(item.screen)}
-          />
+        data={[{ key: 'main' }]} // Usamos um único item para englobar as views
+        renderItem={() => (
+          <View>
+            {/* Carrossel Horizontal de Categorias */}
+            <Animated.FlatList
+              data={categories}
+              renderItem={({ item, index }) => (
+                <CategoryCard
+                  item={item}
+                  index={index}
+                  scrollX={scrollX}
+                  onPress={() => navigateToCategory(item.screen)}
+                />
+              )}
+              keyExtractor={item => item.id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.carouselContainer}
+              // Garante que o item pare exatamente no centro
+              snapToInterval={LIST_ITEM_SIZE} 
+              decelerationRate="fast"
+              onScroll={Animated.event(
+                [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+                { useNativeDriver: true }
+              )}
+              scrollEventThrottle={16}
+            />
+          </View>
         )}
-        keyExtractor={item => item.id}
-        numColumns={2}
-        ListHeaderComponent={renderListHeader} // Adiciona o banner e o título aqui
-        contentContainerStyle={styles.gridContainer}
+        keyExtractor={item => item.key}
+        ListHeaderComponent={renderListHeader}
+        ListFooterComponent={renderListFooter}
+        contentContainerStyle={styles.mainScrollContent}
         showsVerticalScrollIndicator={false}
       />
+
     </View>
   );
 };
 
-// --- Estilos (Adição dos estilos do Banner e ajuste no grid) ---
+// --- Estilos Aprimorados ---
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -283,179 +309,191 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     paddingTop: 60,
-    paddingHorizontal: 30,
+    paddingHorizontal: SPACING,
     paddingBottom: 40,
+    // Estilos de sombra para o Header
+    elevation: 8,
+    shadowColor: COLORS.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
   },
   header: {
     alignItems: 'flex-start',
   },
   subHeading: {
-    fontSize: 30,
+    fontSize: 20,
     fontWeight: '300',
     color: COLORS.textLight,
-    lineHeight: 32,
+    lineHeight: 22,
   },
   subHeadingBold: {
-    fontSize: 34,
-    fontWeight: '800',
+    fontSize: 38, // Aumentei o tamanho
+    fontWeight: '900', // Mais peso
     color: COLORS.textLight,
-    lineHeight: 38,
-    marginBottom: 10,
+    lineHeight: 40,
+    marginBottom: 5,
   },
   subtitle: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.9)',
-    textAlign: 'left',
+    color: 'rgba(255, 255, 255, 0.8)',
     fontWeight: '400',
     marginTop: 5,
   },
+  mainScrollContent: {
+    paddingBottom: 0, // Padding do footer componente cuida da barra de navegação
+  },
+  listHeaderPadding: {
+    // Garante que o banner e o título da seção tenham padding
+    paddingTop: 0, 
+  },
   sectionTitle: {
-      fontSize: 22,
-      fontWeight: '700',
-      color: COLORS.textDark,
-      marginTop: 20,
-      marginBottom: 10,
-      paddingHorizontal: CARD_PADDING,
+    fontSize: 22,
+    fontWeight: '700',
+    color: COLORS.textDark,
+    marginTop: 20,
+    marginBottom: 10,
+    paddingHorizontal: SPACING,
   },
-  gridContainer: {
-    // Retirado o paddingTop de 20 para o banner ficar mais junto
-    paddingBottom: 20 + TAB_BAR_HEIGHT, // AJUSTE DA TAB BAR MANTIDO!
-  },
+  
   // --- Estilos do Banner ---
   bannerContainer: {
-      height: 200, // Altura padrão do banner
-      width: width - (CARD_PADDING * 2),
-      borderRadius: 12,
-      overflow: 'hidden',
-      marginHorizontal: CARD_PADDING, // Centraliza
-      marginTop: 20,
-      marginBottom: 10, // Espaço entre o banner e o título
-      elevation: 5,
-      shadowColor: COLORS.shadow,
-      shadowOffset: { width: 0, height: 5 },
-      shadowOpacity: 0.2,
-      shadowRadius: 10,
+    height: 180, 
+    width: width - (SPACING * 2),
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginHorizontal: SPACING,
+    marginTop: 20,
+    marginBottom: 10, 
+    elevation: 8, // Mais destaque para o banner
+    shadowColor: COLORS.shadow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
   },
   bannerImage: {
-      width: '100%',
-      height: '100%',
-      resizeMode: 'cover',
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
   bannerOverlay: {
-      ...StyleSheet.absoluteFillObject,
-      backgroundColor: COLORS.darkOverlay,
-      opacity: 0.6,
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: COLORS.darkOverlay,
+    opacity: 0.6,
   },
   bannerTextContainer: {
-      position: 'absolute',
-      bottom: 20,
-      left: 20,
-      right: 20,
-      zIndex: 10,
+    position: 'absolute',
+    bottom: 25, // Subiu um pouco
+    left: 20,
+    right: 20,
+    zIndex: 10,
   },
   bannerTitle: {
-      fontSize: 24,
-      fontWeight: '800',
-      color: COLORS.textLight,
-      textShadowColor: 'rgba(0, 0, 0, 0.5)',
-      textShadowOffset: { width: 0, height: 1 },
-      textShadowRadius: 3,
+    fontSize: 28, // Maior e mais impactante
+    fontWeight: '900',
+    color: COLORS.textLight,
+    textShadowColor: 'rgba(0, 0, 0, 0.6)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   bannerSubtitle: {
-      fontSize: 14,
-      color: COLORS.textLight,
-      fontWeight: '400',
-      marginTop: 5,
-      marginBottom: 10,
-      textShadowColor: 'rgba(0, 0, 0, 0.5)',
-      textShadowOffset: { width: 0, height: 1 },
-      textShadowRadius: 2,
+    fontSize: 14,
+    color: COLORS.textLight,
+    fontWeight: '400',
+    marginTop: 5,
+    marginBottom: 15, // Mais espaço antes do CTA
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   bannerCTA: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.primary,
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 20,
+    paddingVertical: 10, // Aumentei o padding
+    paddingHorizontal: 20,
+    borderRadius: 25,
     alignSelf: 'flex-start',
+    elevation: 3,
   },
   bannerCTAText: {
     fontSize: 14,
     fontWeight: '700',
     color: COLORS.textLight,
-    marginRight: 5,
+    marginRight: 8,
   },
-  // --- Estilos de Card (Mantidos) ---
-  categoryCard: {
+
+  // --- Estilos do Carrossel (Aprimorados) ---
+  carouselContainer: {
+    // Garante que o primeiro item comece centralizado no eixo X
+    paddingHorizontal: width / 2 - CARD_WIDTH / 2, 
+    paddingVertical: SPACING, 
+  },
+  carouselCard: {
+    width: CARD_WIDTH,
+    height: CARD_HEIGHT,
     backgroundColor: COLORS.textLight,
-    borderRadius: 12,
-    margin: CARD_MARGIN,
-    shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 15,
+    borderRadius: 18, // Borda mais arredondada
+    marginHorizontal: SPACING / 2,
     overflow: 'hidden',
-    height: 240,
+    shadowColor: COLORS.shadow,
+    shadowOffset: { width: 0, height: 18 }, // Sombra mais projetada
+    shadowOpacity: 0.4,
+    shadowRadius: 25,
+    elevation: 20, // Efeito flutuante
   },
   cardTouchable: {
     flex: 1,
   },
-  cardImage: {
+  carouselCardImage: {
     width: '100%',
     height: '100%',
     position: 'absolute',
     resizeMode: 'cover',
   },
   textOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: '70%',
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12,
+    ...StyleSheet.absoluteFillObject,
   },
   categoryInfoOverlay: {
     position: 'absolute',
-    bottom: 15,
-    left: 15,
-    right: 15,
+    bottom: 25,
+    left: 20,
+    right: 20,
     zIndex: 5,
   },
-  categoryNameOverlay: {
-    fontSize: 19,
-    fontWeight: '800',
-    color: COLORS.textLight,
+  categorySubTitle: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: 'rgba(255, 255, 255, 0.8)',
     marginBottom: 4,
     textShadowColor: 'rgba(0, 0, 0, 0.7)',
     textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
+    textShadowRadius: 4,
   },
-  categoryDescriptionOverlay: {
-    fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.9)',
-    lineHeight: 16,
-    fontWeight: '400',
+  categoryNameOverlay: {
+    fontSize: 28, // Aumentei o tamanho do nome
+    fontWeight: '900',
+    color: COLORS.textLight,
+    marginBottom: 10,
     textShadowColor: 'rgba(0, 0, 0, 0.7)',
     textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-    marginBottom: 10,
+    textShadowRadius: 4,
   },
   callToActionContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 5,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    backgroundColor: COLORS.textLight, // CTA em cor clara para contraste
+    alignSelf: 'flex-start',
+    elevation: 2,
   },
   callToActionText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.textLight,
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.textDark, // Texto escuro no fundo claro
     marginRight: 5,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 1,
   }
 });
 

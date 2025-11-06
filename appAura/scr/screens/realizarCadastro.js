@@ -7,8 +7,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 const { height } = Dimensions.get('window'); 
 // Definindo cores consistentes
-const PRIMARY_COLOR_LIGHT = "#FFADD6"; 
-const PRIMARY_COLOR_DARK = "#f89dc0ff"; 
+const PRIMARY_COLOR_LIGHT = "#FFADD6"; // Rosa mais claro para gradiente
+const PRIMARY_COLOR_DARK = "#fdcadeff";
 const LIGHT_BG = "#FDF6F8"; 
 const GRAY_TEXT = "#707070";
 const DARK_TEXT = "#333333";
@@ -124,13 +124,11 @@ export default function RegisterScreen({ navigation }) {
         >
           {/* Seu Logo aqui */}
           <Image
-            source={require('../assets/logopng.png')} // Substitua pelo caminho do seu logo
+            source={require('../assets/aura.png')} // Substitua pelo caminho do seu logo
             style={styles.logo}
             resizeMode="contain"
           />
-          <Text style={styles.headerTitle}>
-            Criar Sua Conta
-          </Text>
+         
         </LinearGradient>
 
         {/* Renderiza o Formulário de Cadastro */}
@@ -175,9 +173,9 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   logo: {
-    width: 120, 
-    height: 120,
-    marginBottom: 10,
+    width: 170, 
+    height: 170,
+    marginBottom: 50,
   },
   headerTitle: { 
     fontSize: 32, 

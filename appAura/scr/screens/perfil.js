@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, ScrollView, Modal, Dimensions, TouchableWithoutFeedback } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+// O hook useNavigation REAL é usado agora
+import { useNavigation } from '@react-navigation/native'; // MANTIDO
 
 // --- CONFIGURAÇÃO DE ESTILO ---
 const { width } = Dimensions.get('window');
@@ -29,6 +30,7 @@ const MenuItem = ({ icon, text, color = SECONDARY_TEXT_COLOR, onPress, hasChevro
         activeOpacity={0.7} // Efeito de clique mais suave
     >
         <View style={styles.menuItemLeft}>
+            {/* O ícone de cor rosa é o 'Meus Favoritos' */}
             <Ionicons name={icon} size={24} color={color} style={styles.menuIcon} />
             <Text style={[styles.menuText, { color: color === ACCENT_RED ? ACCENT_RED : TEXT_COLOR }]}>{text}</Text>
         </View>
@@ -56,10 +58,10 @@ const CustomModal = ({ isVisible, onClose, title, content, buttons = [{ text: "F
                             {buttons.map((button, index) => (
                                 <TouchableOpacity
                                     key={index}
-                                    style={[modalStyles.button, index === 0 ? modalStyles.buttonClose : modalStyles.buttonPrimary]}
+                                    style={[modalStyles.button, index === 0 && buttons.length === 1 ? modalStyles.buttonPrimary : index === 0 ? modalStyles.buttonClose : modalStyles.buttonPrimary]}
                                     onPress={button.onPress}
                                 >
-                                    <Text style={modalStyles.textStyle}>{button.text}</Text>
+                                    <Text style={[modalStyles.textStyle, index === 0 && buttons.length === 1 ? { color: '#fff' } : index === 0 ? { color: TEXT_COLOR } : { color: '#fff' }]}>{button.text}</Text>
                                 </TouchableOpacity>
                             ))}
                         </View>
@@ -71,7 +73,9 @@ const CustomModal = ({ isVisible, onClose, title, content, buttons = [{ text: "F
 );
 
 export default function ProfileScreen() {
+    // 1. **MUDANÇA**: Usamos o useNavigation real para permitir a navegação entre telas.
     const navigation = useNavigation();
+
     const [modalVisible, setModalVisible] = useState(false);
     const [modalData, setModalData] = useState({});
 
@@ -85,36 +89,21 @@ export default function ProfileScreen() {
     const handleAction = (type) => {
         switch (type) {
             case 'Favoritos':
-                openModal(
-                    "Meus Favoritos",
-                    "A lista de produtos que você mais ama! Criei este modal personalizado para deixar a tela de perfil mais elegante.",
-                    [{ text: "Fechar", onPress: () => setModalVisible(false), color: TEXT_COLOR }]
-                );
+                // 2. **MUDANÇA**: Navega diretamente para a tela 'Favoritos'
+                // Certifique-se de que esta rota exista no seu Stack Navigator
+                navigation.navigate('Favoritos');
                 break;
 
-            case 'Idioma':
-                openModal(
-                    "Escolher Idioma",
-                    "Selecione o idioma da aplicação (recurso visual, não funcional).",
-                    [
-                        { text: "Português", onPress: () => setModalVisible(false) },
-                        { text: "Inglês", onPress: () => setModalVisible(false) },
-                    ]
-                );
+            case 'Notificacoes':
+                // 2. **MUDANÇA**: Navega diretamente para a tela 'Notificacoes'
+                // Certifique-se de que esta rota exista no seu Stack Navigator
+                navigation.navigate('Notificacoes');
                 break;
 
             case 'Sobre':
                 openModal(
                     "Sobre o Aplicativo",
                     "Esta é a versão mais profissional do nosso app, dedicada a oferecer uma experiência de compra moderna, intuitiva e segura, com foco total no cliente.",
-                    [{ text: "Fechar", onPress: () => setModalVisible(false) }]
-                );
-                break;
-
-            case 'Termos':
-                openModal(
-                    "Termos e Condições",
-                    "Detalhes importantes sobre o uso dos serviços, direitos e responsabilidades. A leitura é recomendada antes de utilizar a plataforma.",
                     [{ text: "Fechar", onPress: () => setModalVisible(false) }]
                 );
                 break;
@@ -136,8 +125,10 @@ export default function ProfileScreen() {
                         {
                             text: "Sair",
                             onPress: () => {
+                                // 3. **MUDANÇA**: Garante que o modal feche E depois navegue
                                 setModalVisible(false);
                                 // Navega para a tela de Login
+                                // Se você quiser que o usuário NÃO consiga voltar para o perfil, use navigation.replace('Login')
                                 navigation.navigate('Login');
                             },
                             color: ACCENT_RED
@@ -151,17 +142,19 @@ export default function ProfileScreen() {
         }
     };
 
-    // Lista de itens de menu
+    // Lista de itens de menu ATUALIZADA
     const menuItems = [
+        // Ação alterada para chamar handleAction('Favoritos')
         { icon: 'heart', text: 'Meus Favoritos', action: () => handleAction('Favoritos'), color: PRIMARY_PINK },
-        { icon: 'language-outline', text: 'Idioma', action: () => handleAction('Idioma') },
+        // Ação alterada para chamar handleAction('Notificacoes')
+        { icon: 'notifications-outline', text: 'Notificações', action: () => handleAction('Notificacoes') },
         { icon: 'help-circle-outline', text: 'Sobre', action: () => handleAction('Sobre') },
-        { icon: 'information-circle-outline', text: 'Termos e Condições', action: () => handleAction('Termos') },
         { icon: 'lock-closed-outline', text: 'Política de Privacidade', action: () => handleAction('Privacy') },
         { icon: 'log-out-outline', text: 'Sair', action: () => handleAction('Logout'), color: ACCENT_RED, hasChevron: false },
     ];
 
-    // Compensação para a barra de navegação flutuante (conforme sua instrução)
+    // Compensação para a barra de navegação flutuante
+    // **NOTA**: Mantendo a lógica de compensação conforme a sua instrução anterior (2025-10-21)
     const TAB_NAVIGATION_HEIGHT = 120;
 
     return (
@@ -190,8 +183,10 @@ export default function ProfileScreen() {
                         <Image
                             source={{ uri: userData.profileImage }}
                             style={styles.profileImage}
+                            // Fallback visual para garantir que sempre haja algo
+                            onError={(e) => console.log('Erro ao carregar imagem: ', e.nativeEvent.error)}
                         />
-                        <TouchableOpacity style={styles.editButton}>
+                        <TouchableOpacity style={styles.editButton} onPress={() => openModal("Editar Foto", "Ação de edição de foto de perfil simulada.", [{ text: "OK", onPress: () => setModalVisible(false) }])}>
                             <Ionicons name="pencil-outline" size={20} color="#fff" />
                         </TouchableOpacity>
                     </View>
@@ -385,6 +380,7 @@ const modalStyles = StyleSheet.create({
         textAlign: "center",
         fontSize: 14,
         color: SECONDARY_TEXT_COLOR,
+        fontWeight: '500',
         lineHeight: 20,
     },
     modalButtons: {
@@ -395,7 +391,7 @@ const modalStyles = StyleSheet.create({
     },
     button: {
         borderRadius: 10,
-        padding: 10,
+        paddingVertical: 12,
         elevation: 2,
         flex: 1,
         marginHorizontal: 5,

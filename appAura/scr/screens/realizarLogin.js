@@ -40,7 +40,7 @@ export default function LoginScreen({ navigation }) {
       >
         {/* Seu Logo aqui */}
         <Image
-          source={require('../assets/logopng.png')} // Substitua pelo caminho do seu logo
+          source={require('../assets/aura.png')} // Substitua pelo caminho do seu logo
           style={styles.logo}
           resizeMode="contain"
         />
@@ -111,9 +111,9 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   logo: {
-    width: 120, // Tamanho do seu logo
-    height: 120,
-    marginBottom: 10,
+    width: 170, // Tamanho do seu logo
+    height: 170,
+    marginBottom: 50,
   },
   headerTitle: { fontSize: 32, fontWeight: '900', color: '#fff', textShadowColor: 'rgba(0,0,0,0.15)', textShadowOffset: {width: 1, height: 1}, textShadowRadius: 2 },
   

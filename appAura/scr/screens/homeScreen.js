@@ -17,16 +17,16 @@ import { LinearGradient } from 'expo-linear-gradient';
 const { width } = Dimensions.get("window");
 const BANNER_WIDTH = width - 40;
 const MAIN_PINK = "#ff86b4";
-const LIGHT_PINK = "#FDEFF1";
-const VERY_LIGHT_PINK = "#fce3f7";
+const LIGHT_PINK = "#FDEFF1"; // Cor de fundo mais suave para o gradiente
+const VERY_LIGHT_PINK = "#fce3f7"; // Mantida, mas pouco usada
 const LIGHT_BG = "#fff";
 
 const HORIZONTAL_PADDING = 20;
-const PRODUCT_CARD_MARGIN = 20;
+const PRODUCT_CARD_MARGIN = 15; // Diminuído o margin
 const PRODUCT_CARD_WIDTH = (width - HORIZONTAL_PADDING * 2 - PRODUCT_CARD_MARGIN) / 2;
 
 // 1. IMPORTAÇÃO DA LOGO
-const LOGO_IMAGE = require('../assets/auralogo.png'); 
+const LOGO_IMAGE = require('../assets/auralogo.png');
 
 const categories = [
   { name: "Skin Care", image: require('../assets/cate_skin.png') },
@@ -38,7 +38,7 @@ const categories = [
 const promotionBanners = [
   {
     id: 1,
-    title: "Oferta de Outono",
+    title: "Ofertaa de Outono",
     subtitle: "Até 30% OFF em Maquiagem.",
     backgroundImage: "https://i.pinimg.com/736x/41/b5/27/41b527efe61cae9e5ede5b254cc5acc9.jpg",
   },
@@ -58,7 +58,7 @@ const promotionBanners = [
 
 const products = [
   { id: 1, name: "Gloss Fran By Franciny", newPrice: "R$59,67", image: require('../assets/prod.png'), rating: 4.8 },
-  { id: 2, name: "Casual T-Shirt", newPrice: "$85.00", image: require('../assets/2.png'), rating: 4.5 },
+  { id: 2, name: "Casual T-Shirt Longa", newPrice: "$85.00", image: require('../assets/2.png'), rating: 4.5 },
   { id: 3, name: "High-Waist Jeans", newPrice: "$149.00", image: require('../assets/3.png'), rating: 4.9 },
   { id: 4, name: "Mineral Primer", newPrice: "$39.90", image: require('../assets/4.png'), rating: 4.2 },
   { id: 5, name: "Silk Scarf", newPrice: "$45.00", image: require('../assets/5.png'), rating: 4.6 },
@@ -100,8 +100,9 @@ const ProductCard = ({ product }) => {
   return (
     <TouchableOpacity style={styles.productCard} onPress={handleCardPress}>
       <View style={styles.productImageBackground}>
+        {/* ALTERAÇÃO: Usando LIGHT_PINK para um gradiente mais suave */}
         <LinearGradient
-          colors={[VERY_LIGHT_PINK, '#fff']}
+          colors={[LIGHT_PINK, '#fff']}
           style={styles.gradientOverlay}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
@@ -114,29 +115,38 @@ const ProductCard = ({ product }) => {
         </LinearGradient>
       </View>
 
+      {/* ALTERAÇÃO: Posicionamento mais sutil do botão de favorito */}
       <TouchableOpacity onPress={toggleFavorite} style={styles.favoriteButton}>
         <Ionicons
-          name={isFavorite ? 'heart' : 'heart'}
+          // ALTERAÇÃO: Usa outline quando não está favoritado
+          name={isFavorite ? 'heart' : 'heart-outline'}
           size={22}
           color={MAIN_PINK}
         />
       </TouchableOpacity>
 
       <View style={styles.productDetails}>
-        {/* ALTERADO: Removido numberOfLines para permitir que o texto ocupe mais linhas */}
-        <Text style={styles.productName}>{product.name}</Text>
-
-        <View style={styles.priceContainer}>
-          <Text style={styles.originalPrice}>
-            {product.price}
+        {/* NOVO: Container para Nome e Avaliação */}
+        <View style={styles.nameRatingRow}>
+          <Text style={styles.productName} numberOfLines={2}>
+            {product.name}
           </Text>
+          <View style={styles.ratingContainer}>
+            <Ionicons name="star" size={14} color="#FFD700" />
+            <Text style={styles.ratingText}>{product.rating ? product.rating.toFixed(1) : '4.5'}</Text>
+          </View>
+        </View>
+        
+        <View style={styles.priceContainer}>
+          {/* Ocultado originalPrice se não houver 'price' no objeto product */}
+          {product.price && (
+             <Text style={styles.originalPrice}>
+               {product.price}
+             </Text>
+          )}
           <Text style={styles.currentPrice}>{product.newPrice}</Text>
         </View>
 
-        <View style={styles.ratingContainer}>
-          <Ionicons name="star" size={16} color="#000000ff" />
-          <Text style={styles.ratingText}>{product.rating ? product.rating.toFixed(1) : '4.5'}</Text>
-        </View>
       </View>
     </TouchableOpacity>
   );
@@ -166,8 +176,7 @@ const CategoryCard = ({ item }) => {
           resizeMode="cover"
         />
       </View>
-      {/* ALTERADO: Removido numberOfLines para permitir que o texto ocupe mais linhas */}
-      <Text style={styles.categoryName}>
+      <Text style={styles.categoryName} numberOfLines={2}>
         {item.name}
       </Text>
     </TouchableOpacity>
@@ -359,7 +368,7 @@ const styles = StyleSheet.create({
   },
   // O 'paddingBottom: 100' está reservando espaço para a tab navigation, conforme sua instrução salva.
   scrollViewContent: {
-    paddingBottom: 100, 
+    paddingBottom: 100,
   },
 
   topBackground: {
@@ -375,37 +384,18 @@ const styles = StyleSheet.create({
 
   searchBarContainer: {
     flexDirection: "row",
-    // CHAVE DA ALTERAÇÃO: Centraliza o conteúdo (a Logo) no eixo principal (horizontal)
-    justifyContent: "center", 
+    justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: HORIZONTAL_PADDING,
     paddingTop: 50,
   },
   
-  // ESTILO DA LOGO: Garantindo que ela não ocupe toda a largura
   logoImage: {
-    width: 140, 
-    height: 50, 
+    width: 140,
+    height: 50,
+    
     resizeMode: 'contain',
   },
-
-  // Estilos de localização removidos/não usados:
-  locationContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.7)",
-    borderRadius: 20,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-  },
-  locationText: {
-    marginLeft: 5,
-    marginRight: 5,
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#000",
-  },
-  // Fim dos estilos de localização
 
   searchFilterRow: {
     flexDirection: "row",
@@ -497,11 +487,10 @@ const styles = StyleSheet.create({
   categoryList: {
     paddingHorizontal: HORIZONTAL_PADDING,
     marginBottom: 30,
-    // Removido justifyContent: "space-between" para não esticar demais se tiver poucos itens
   },
   categoryCard: {
     alignItems: "center",
-    width: width / 5, // Isso ainda pode limitar o espaço para o nome
+    width: width / 5, 
     marginRight: 15,
   },
   categoryIconCircle: {
@@ -524,9 +513,9 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#555",
     textAlign: "center",
-    // REMOVIDO: numberOfLines para permitir que o texto se quebre em várias linhas
-    // ou ocupe o espaço necessário. Se quiser limitar, use numberOfLines={2} por exemplo.
-    // minHeight: 28, // Adicione um minHeight se precisar de espaço para 2 linhas.
+    // NOVO: Limitando a 2 linhas para evitar quebra de layout
+    numberOfLines: 2, 
+    minHeight: 28, 
   },
 
   productsGrid: {
@@ -536,22 +525,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: HORIZONTAL_PADDING,
   },
 
+  // ESTILOS DO CARD DE PRODUTO OTIMIZADOS
   productCard: {
     width: PRODUCT_CARD_WIDTH,
-    marginBottom: PRODUCT_CARD_MARGIN,
+    marginBottom: PRODUCT_CARD_MARGIN + 5, // Aumentado um pouco o espaço entre as linhas
     backgroundColor: '#fff',
-    borderRadius: 20,
+    // NOVO: Aumentado o border radius
+    borderRadius: 25, 
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 8,
+    // NOVO: Sombra mais suave e elevada
+    shadowOffset: { width: 0, height: 8 }, 
+    shadowOpacity: 0.1, 
+    shadowRadius: 12, 
+    elevation: 10,
     position: 'relative',
     overflow: 'hidden',
   },
   productImageBackground: {
     width: '100%',
     height: 160,
+    // NOVO: Permite que a imagem e o gradiente sigam o borderRadius do card
+    borderTopLeftRadius: 25, 
+    borderTopRightRadius: 25,
+    overflow: 'hidden',
   },
   gradientOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -564,60 +560,77 @@ const styles = StyleSheet.create({
   },
   favoriteButton: {
     position: 'absolute',
-    top: 10,
-    right: 10,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    top: 15,
+    right: 15,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
+    // NOVO: Sombra sutil para o botão de favorito
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    elevation: 4,
     zIndex: 10,
   },
   productDetails: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-    paddingTop: 8,
+    paddingHorizontal: 12,
+    paddingBottom: 15,
+    paddingTop: 10,
+  },
+  
+  // NOVO: Linha para Nome e Avaliação (topo dos detalhes)
+  nameRatingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 5,
   },
   productName: {
-    fontSize: 18,
-    fontWeight: '800',
+    fontSize: 16,
+    // NOVO: Font weight um pouco mais leve, mas ainda forte
+    fontWeight: '700', 
     color: '#333',
-    marginBottom: 10,
-    // ALTERADO: Aumentado o minHeight e removido numberOfLines
-    minHeight: 50, // Permite que o texto ocupe mais espaço verticalmente
-    // Se ainda quiser limitar a 2 linhas, adicione: numberOfLines={2},
-    // mas certifique-se que o minHeight seja suficiente para 2 linhas.
+    // NOVO: Garante que o nome não empurre outros elementos
+    flex: 1,
+    marginRight: 10,
+    minHeight: 40, // Espaço para 2 linhas (ex: ~20px por linha)
   },
+  
   priceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    // NOVO: Removido margin bottom para destacar mais o preço
+    marginBottom: 0, 
+    marginTop: 5,
   },
   originalPrice: {
-    fontSize: 15,
+    fontSize: 14,
     color: '#a1a1aa',
     textDecorationLine: 'line-through',
-    marginRight: 10,
+    marginRight: 8,
     fontWeight: '500',
   },
   currentPrice: {
-    fontSize: 18,
-    fontWeight: '800',
+    fontSize: 19,
+    fontWeight: '900', // Mais forte para o preço atual
     color: MAIN_PINK,
   },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: LIGHT_PINK, // Fundo sutil para a classificação
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 10,
   },
   ratingText: {
-    fontSize: 15,
+    fontSize: 13,
     color: '#333',
-    marginLeft: 5,
+    marginLeft: 3,
     fontWeight: '600',
   },
 });
