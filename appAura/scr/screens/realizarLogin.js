@@ -3,7 +3,8 @@ import {
   View, Text, TextInput, TouchableOpacity, 
   StyleSheet, KeyboardAvoidingView, Platform, Image, Dimensions 
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient'; // Importar LinearGradient
+import { LinearGradient } from 'expo-linear-gradient'; 
+import { supabase } from '../screens/supabase'; // importe no topo// Importar LinearGradient
 
 const { height } = Dimensions.get('window'); 
 const PRIMARY_COLOR_LIGHT = "#FFADD6"; // Rosa mais claro para gradiente
@@ -16,9 +17,26 @@ export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
 
-  const handleLogin = () => {
-    navigation.navigate('Main'); // Vai pra tela principal (BottomTabs)
-  };
+const handleLogin = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('usuarios')
+      .select('*')
+      .eq('email', email)
+      .eq('senha', senha)
+      .single(); // retorna um único usuário
+
+    if (error || !data) {
+      alert("E-mail ou senha incorretos!");
+    } else {
+      alert("Login realizado com sucesso!");
+      navigation.navigate('Main'); // leva para a tela principal
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao conectar. Tente novamente.");
+  }
+};
 
   return (
     <KeyboardAvoidingView
