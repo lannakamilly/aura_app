@@ -1,410 +1,377 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, ScrollView, Modal, Dimensions, TouchableWithoutFeedback } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-// O hook useNavigation REAL é usado agora
-import { useNavigation } from '@react-navigation/native'; // MANTIDO
+import React, { useState, useEffect } from 'react';
+import { 
+  View, Text, TextInput, TouchableOpacity, 
+  StyleSheet, Alert, ActivityIndicator, Dimensions, ScrollView, Image 
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '../screens/supabase'; // Importe conforme seu caminho
+import { Feather, Ionicons } from '@expo/vector-icons'; // Importação de ícones
 
-// --- CONFIGURAÇÃO DE ESTILO ---
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get('window'); 
+const PRIMARY_COLOR_LIGHT = "#FFADD6"; 
+const PRIMARY_COLOR_DARK = "#fdcadeff"; 
+const LIGHT_BG = "#FDF6F8"; 
+const DARK_TEXT = "#333333";
+const GRAY_TEXT = "#707070";
+const RED_ALERT = "#FF4D4D";
 
-const PRIMARY_PINK = '#ff86b5';
-const ACCENT_RED = '#DC143C';
-const TEXT_COLOR = '#111827';
-const SECONDARY_TEXT_COLOR = '#808080ff';
-const BACKGROUND_GREY = '#F9FAFB';
-const BORDER_COLOR = '#E5E7EB';
-const HEADER_COLOR = PRIMARY_PINK; // Usando o rosa vibrante como cor principal do topo
+export default function ProfileScreen({ navigation }) {
+  const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState(null); 
+  const [currentEmail, setCurrentEmail] = useState('');
+  const [userName, setUserName] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isUpdatingName, setIsUpdatingName] = useState(false);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
-// Dados mockados do usuário
-const userData = {
-    name: 'Ana Carolina Silva',
-    email: 'ana.carol.silva@exemplo.com',
-    profileImage: 'https://fly.metroimg.com/upload/q_85,w_700/https://uploads.metroimg.com/wp-content/uploads/2021/10/08145814/adele-13.jpg',
-};
+  useEffect(() => {
+    loadProfileData();
+  }, []);
 
-// Componente para cada item de menu
-const MenuItem = ({ icon, text, color = SECONDARY_TEXT_COLOR, onPress, hasChevron = true }) => (
-    <TouchableOpacity
-        style={styles.menuItem}
-        onPress={onPress}
-        activeOpacity={0.7} // Efeito de clique mais suave
-    >
-        <View style={styles.menuItemLeft}>
-            {/* O ícone de cor rosa é o 'Meus Favoritos' */}
-            <Ionicons name={icon} size={24} color={color} style={styles.menuIcon} />
-            <Text style={[styles.menuText, { color: color === ACCENT_RED ? ACCENT_RED : TEXT_COLOR }]}>{text}</Text>
-        </View>
-        {hasChevron && (
-            <Ionicons name="chevron-forward-outline" size={20} color={SECONDARY_TEXT_COLOR} />
-        )}
-    </TouchableOpacity>
-);
+  async function loadProfileData() {
+    setLoading(true);
+    try {
+      const storedId = await AsyncStorage.getItem('user_session_id');
+      const storedEmail = await AsyncStorage.getItem('user_session_email');
 
-// --- COMPONENTE DO MODAL REUTILIZÁVEL (SUBSTITUI O ALERT) ---
-const CustomModal = ({ isVisible, onClose, title, content, buttons = [{ text: "Fechar", onPress: onClose }] }) => (
-    <Modal
-        animationType="fade"
-        transparent={true}
-        visible={isVisible}
-        onRequestClose={onClose}
-    >
-        <TouchableWithoutFeedback onPress={onClose}>
-            <View style={modalStyles.centeredView}>
-                <TouchableWithoutFeedback>
-                    <View style={modalStyles.modalView}>
-                        <Text style={modalStyles.modalTitle}>{title}</Text>
-                        <Text style={modalStyles.modalContent}>{content}</Text>
-                        <View style={modalStyles.modalButtons}>
-                            {buttons.map((button, index) => (
-                                <TouchableOpacity
-                                    key={index}
-                                    style={[modalStyles.button, index === 0 && buttons.length === 1 ? modalStyles.buttonPrimary : index === 0 ? modalStyles.buttonClose : modalStyles.buttonPrimary]}
-                                    onPress={button.onPress}
-                                >
-                                    <Text style={[modalStyles.textStyle, index === 0 && buttons.length === 1 ? { color: '#fff' } : index === 0 ? { color: TEXT_COLOR } : { color: '#fff' }]}>{button.text}</Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-                    </View>
-                </TouchableWithoutFeedback>
-            </View>
-        </TouchableWithoutFeedback>
-    </Modal>
-);
+      if (!storedId) {
+        Alert.alert('Sessão Expirada', 'Por favor, faça o login novamente.');
+        navigation.navigate('Login');
+        return;
+      }
+      
+      setUserId(storedId);
+      setCurrentEmail(storedEmail || 'email não encontrado');
 
-export default function ProfileScreen() {
-    // 1. **MUDANÇA**: Usamos o useNavigation real para permitir a navegação entre telas.
-    const navigation = useNavigation();
+      // Buscar nome na tabela 'usuarios' usando o ID
+      const { data, error } = await supabase
+        .from('usuarios')
+        .select('nome')
+        .eq('id', storedId)
+        .single();
+      
+      if (error) throw error;
 
-    const [modalVisible, setModalVisible] = useState(false);
-    const [modalData, setModalData] = useState({});
+      if (data) {
+        setUserName(data.nome);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar perfil:", error);
+      Alert.alert('Erro', 'Não foi possível carregar as informações do perfil.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
-    // Função para abrir o modal com dados específicos
-    const openModal = (title, content, buttons) => {
-        setModalData({ title, content, buttons });
-        setModalVisible(true);
-    };
+  // --- Funções de Atualização ---
 
-    // Ações de Modal e Navegação
-    const handleAction = (type) => {
-        switch (type) {
-            case 'Favoritos':
-                // 2. **MUDANÇA**: Navega diretamente para a tela 'Favoritos'
-                // Certifique-se de que esta rota exista no seu Stack Navigator
-                navigation.navigate('Favoritos');
-                break;
+  async function handleUpdateName() {
+    if (!userName || !userId) return;
+    setIsUpdatingName(true);
 
-            case 'Notificacoes':
-                // 2. **MUDANÇA**: Navega diretamente para a tela 'Notificacoes'
-                // Certifique-se de que esta rota exista no seu Stack Navigator
-                navigation.navigate('Notificacoes');
-                break;
+    try {
+      const { error } = await supabase
+        .from('usuarios')
+        .update({ nome: userName })
+        .eq('id', userId); 
 
-            case 'Sobre':
-                openModal(
-                    "Sobre o Aplicativo",
-                    "Esta é a versão mais profissional do nosso app, dedicada a oferecer uma experiência de compra moderna, intuitiva e segura, com foco total no cliente.",
-                    [{ text: "Fechar", onPress: () => setModalVisible(false) }]
-                );
-                break;
+      if (error) throw error;
+      
+      Alert.alert('Sucesso', 'Nome atualizado com sucesso!');
+    } catch (error) {
+      Alert.alert('Erro ao atualizar', error.message);
+    } finally {
+      setIsUpdatingName(false);
+    }
+  }
 
-            case 'Privacy':
-                openModal(
-                    "Política de Privacidade",
-                    "Compromisso total com a segurança dos seus dados. Nossa política explica como suas informações são coletadas, usadas e protegidas.",
-                    [{ text: "Fechar", onPress: () => setModalVisible(false) }]
-                );
-                break;
+  async function handleUpdatePassword() {
+    if (newPassword.length < 6) {
+      Alert.alert('Erro', 'A senha deve ter no mínimo 6 caracteres.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      Alert.alert('Erro', 'As senhas não conferem.');
+      return;
+    }
 
-            case 'Logout':
-                openModal(
-                    "Confirmação de Saída",
-                    "Tem certeza de que deseja sair da sua conta? Você será redirecionado para a tela de Login.",
-                    [
-                        { text: "Cancelar", onPress: () => setModalVisible(false), style: 'cancel' },
-                        {
-                            text: "Sair",
-                            onPress: () => {
-                                // 3. **MUDANÇA**: Garante que o modal feche E depois navegue
-                                setModalVisible(false);
-                                // Navega para a tela de Login
-                                // Se você quiser que o usuário NÃO consiga voltar para o perfil, use navigation.replace('Login')
-                                navigation.navigate('Login');
-                            },
-                            color: ACCENT_RED
-                        },
-                    ]
-                );
-                break;
+    setIsUpdatingPassword(true);
+    try {
+      // Atualiza o campo 'senha' na sua tabela 'usuarios'
+      const { error } = await supabase
+        .from('usuarios')
+        .update({ senha: newPassword }) 
+        .eq('id', userId);
+      
+      if (error) throw error;
 
-            default:
-                break;
-        }
-    };
+      Alert.alert('Sucesso', 'Senha alterada com sucesso!');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error) {
+      Alert.alert('Erro ao alterar senha', error.message);
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  }
 
-    // Lista de itens de menu ATUALIZADA
-    const menuItems = [
-        // Ação alterada para chamar handleAction('Favoritos')
-        { icon: 'heart', text: 'Meus Favoritos', action: () => handleAction('Favoritos'), color: PRIMARY_PINK },
-        // Ação alterada para chamar handleAction('Notificacoes')
-        { icon: 'notifications-outline', text: 'Notificações', action: () => handleAction('Notificacoes') },
-        { icon: 'help-circle-outline', text: 'Sobre', action: () => handleAction('Sobre') },
-        { icon: 'lock-closed-outline', text: 'Política de Privacidade', action: () => handleAction('Privacy') },
-        { icon: 'log-out-outline', text: 'Sair', action: () => handleAction('Logout'), color: ACCENT_RED, hasChevron: false },
-    ];
+  async function handleLogout() {
+    await AsyncStorage.removeItem('user_session_id');
+    await AsyncStorage.removeItem('user_session_email');
+    await AsyncStorage.removeItem('user_session_name');
 
-    // Compensação para a barra de navegação flutuante
-    // **NOTA**: Mantendo a lógica de compensação conforme a sua instrução anterior (2025-10-21)
-    const TAB_NAVIGATION_HEIGHT = 120;
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Login' }],
+    });
+  }
 
+  // --- Funções de Navegação Adicionadas ---
+  const navigateToNotifications = () => {
+    navigation.navigate('Notificacoes'); 
+  };
+
+  if (loading && !userId) {
     return (
-        <View style={styles.outerContainer}>
-            {/* Modal para as descrições e ações */}
-            <CustomModal
-                isVisible={modalVisible}
-                onClose={() => setModalVisible(false)}
-                title={modalData.title}
-                content={modalData.content}
-                buttons={modalData.buttons}
-            />
-
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={[styles.scrollContent, { paddingBottom: TAB_NAVIGATION_HEIGHT }]}>
-
-                {/* CABEÇALHO SIMPLIFICADO E PROFISSIONAL */}
-                <View style={styles.headerBackground}>
-                    <Text style={styles.headerTitle}>Meu Perfil</Text>
-                </View>
-
-                {/* Card principal com as informações do perfil */}
-                <View style={styles.profileCard}>
-
-                    {/* Imagem de Perfil com Botão de Edição */}
-                    <View style={styles.imageWrapper}>
-                        <Image
-                            source={{ uri: userData.profileImage }}
-                            style={styles.profileImage}
-                            // Fallback visual para garantir que sempre haja algo
-                            onError={(e) => console.log('Erro ao carregar imagem: ', e.nativeEvent.error)}
-                        />
-                        <TouchableOpacity style={styles.editButton} onPress={() => openModal("Editar Foto", "Ação de edição de foto de perfil simulada.", [{ text: "OK", onPress: () => setModalVisible(false) }])}>
-                            <Ionicons name="pencil-outline" size={20} color="#fff" />
-                        </TouchableOpacity>
-                    </View>
-
-                    {/* Nome e Email */}
-                    <Text style={styles.userName}>{userData.name}</Text>
-                    <Text style={styles.userEmail}>{userData.email}</Text>
-                </View>
-
-                {/* Área de Itens de Menu */}
-                <View style={styles.menuContainer}>
-                    {menuItems.map((item, index) => (
-                        <MenuItem
-                            key={index}
-                            icon={item.icon}
-                            text={item.text}
-                            color={item.color}
-                            hasChevron={item.hasChevron}
-                            onPress={item.action}
-                        />
-                    ))}
-                </View>
-
-            </ScrollView>
-        </View>
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={PRIMARY_COLOR_DARK} />
+      </View>
     );
+  }
+
+  return (
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      
+      {/* HEADER PRINCIPAL COM BOTÃO DE NOTIFICAÇÕES */}
+      <View style={styles.mainHeader}>
+        <Text style={styles.headerTitle}>Meu Perfil</Text>
+        <TouchableOpacity 
+            style={styles.notificationButton} 
+            onPress={navigateToNotifications}
+            disabled={loading}
+        >
+            <Ionicons name="notifications-outline" size={24} color={PRIMARY_COLOR_DARK} />
+        </TouchableOpacity>
+      </View>
+
+      {/* CARTÃO DE INFORMAÇÕES DO USUÁRIO */}
+      <View style={styles.userInfoCard}>
+        <Feather name="user" size={70} color={PRIMARY_COLOR_DARK} style={styles.avatar} />
+        <Text style={styles.userName}>{userName || 'Carregando Nome...'}</Text>
+        <Text style={styles.userEmail}>{currentEmail}</Text>
+      </View>
+
+      {/* --- SEÇÃO DE ATUALIZAÇÃO DE NOME --- */}
+      <View style={styles.sectionCard}>
+        <Text style={styles.sectionTitle}>Atualizar Dados Pessoais</Text>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Novo Nome</Text>
+          <TextInput
+            style={styles.input}
+            onChangeText={setUserName}
+            value={userName}
+            placeholder="Digite o novo nome"
+            editable={!isUpdatingName}
+          />
+        </View>
+        
+        <TouchableOpacity 
+          style={[styles.actionButton, isUpdatingName && styles.disabledButton]} 
+          onPress={handleUpdateName} 
+          disabled={isUpdatingName || !userName}
+        >
+          <Text style={styles.actionButtonText}>
+            {isUpdatingName ? 'Salvando...' : 'Salvar Novo Nome'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* --- SEÇÃO DE ALTERAÇÃO DE SENHA --- */}
+      <View style={styles.sectionCard}>
+        <Text style={styles.sectionTitle}>Segurança (Alterar Senha)</Text>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Nova Senha</Text>
+          <TextInput
+            style={styles.input}
+            onChangeText={setNewPassword}
+            value={newPassword}
+            placeholder="Mínimo 6 caracteres"
+            secureTextEntry={true}
+            editable={!isUpdatingPassword}
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Confirmar Nova Senha</Text>
+          <TextInput
+            style={styles.input}
+            onChangeText={setConfirmPassword}
+            value={confirmPassword}
+            placeholder="Repita a nova senha"
+            secureTextEntry={true}
+            editable={!isUpdatingPassword}
+          />
+        </View>
+        
+        <TouchableOpacity 
+          style={[styles.actionButton, isUpdatingPassword && styles.disabledButton]} 
+          onPress={handleUpdatePassword} 
+          disabled={isUpdatingPassword || newPassword.length < 6 || newPassword !== confirmPassword}
+        >
+          <Text style={styles.actionButtonText}>
+            {isUpdatingPassword ? 'Atualizando...' : 'Atualizar Senha'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+      
+      {/* --- BOTÃO DE SAIR --- */}
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} disabled={loading}>
+        <Feather name="log-out" size={20} color="#fff" style={{ marginRight: 10 }} />
+        <Text style={styles.logoutButtonText}>Sair do Aplicativo</Text>
+      </TouchableOpacity>
+      
+    </ScrollView>
+  );
 }
 
-
-// --- ESTILOS PROFISSIONAIS ---
-
+// --- Estilos ---
 const styles = StyleSheet.create({
-    outerContainer: {
-        flex: 1,
-        backgroundColor: BACKGROUND_GREY,
-    },
+  container: { 
+    flex: 1, 
+    backgroundColor: LIGHT_BG, 
+  },
+  contentContainer: {
+    padding: 20,
+    // Ajuste MANDATÓRIO para a Tab Navigation
+    paddingBottom: 100, 
+  },
+  mainHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingTop: 10,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '900',
+    color: DARK_TEXT,
+  },
+  notificationButton: {
+    padding: 10,
+    borderRadius: 25,
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 3,
+  },
+  
+  // Cartão de Informações do Usuário (Top)
+  userInfoCard: {
+    backgroundColor: PRIMARY_COLOR_LIGHT + '40', // Um rosa bem suave de fundo
+    borderRadius: 20,
+    padding: 25,
+    alignItems: 'center',
+    marginBottom: 30,
+    borderWidth: 1,
+    borderColor: PRIMARY_COLOR_DARK + '20',
+  },
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#fff',
+    textAlign: 'center',
+    lineHeight: 100,
+    marginBottom: 15,
+    borderWidth: 3,
+    borderColor: PRIMARY_COLOR_DARK,
+    overflow: 'hidden', // Para garantir que o ícone fique contido
+  },
+  userName: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: DARK_TEXT,
+    marginBottom: 5,
+  },
+  userEmail: {
+    fontSize: 16,
+    color: GRAY_TEXT,
+  },
 
-    // A cor de fundo aqui é definida dinamicamente na função
-    scrollContent: {},
+  // Cartões de Seção (Atualizações)
+  sectionCard: {
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: PRIMARY_COLOR_DARK,
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: PRIMARY_COLOR_DARK,
+    marginBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    paddingBottom: 10,
+  },
+  inputContainer: { marginBottom: 15 },
+  label: { fontSize: 14, color: DARK_TEXT, fontWeight: '600', marginBottom: 5 },
+  input: {
+    width: '100%',
+    height: 50,
+    backgroundColor: LIGHT_BG,
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  
+  // Botões de Ação dentro das Seções
+  actionButton: {
+    marginTop: 5,
+    backgroundColor: PRIMARY_COLOR_DARK,
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  actionButtonText: { 
+    color: '#fff', 
+    fontSize: 16, 
+    fontWeight: '700' 
+  },
+  disabledButton: {
+    backgroundColor: GRAY_TEXT,
+  },
 
-    // CABEÇALHO (Seção Rosa Vibrante) - Mais limpo e sem botões de navegação
-    headerBackground: {
-        height: 150, // Altura reduzida para mais elegância
-        backgroundColor: HEADER_COLOR,
-        borderBottomLeftRadius: 30,
-        borderBottomRightRadius: 30,
-        justifyContent: 'center', // Centraliza o título
-        alignItems: 'center',
-        paddingTop: 30,
-    },
-    headerTitle: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        color: '#fff',
-        marginTop: 15,
-    },
-
-    // CARD DO PERFIL
-    profileCard: {
-        backgroundColor: '#fff',
-        marginHorizontal: 20,
-        borderRadius: 25, // Borda mais suave
-        padding: 25,
-        alignItems: 'center',
-
-        // Joga o card para cima, sobrepondo o fundo
-        marginTop: -70, // Ajuste para subir menos
-
-        // Sombra mais profunda
-        shadowColor: PRIMARY_PINK,
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.15,
-        shadowRadius: 20,
-        elevation: 10,
-        marginBottom: 30,
-    },
-
-    // IMAGEM DE PERFIL E EDIÇÃO
-    imageWrapper: {
-        marginBottom: 15,
-        position: 'relative',
-    },
-    profileImage: {
-        width: 110,
-        height: 110,
-        borderRadius: 55,
-        borderWidth: 4,
-        borderColor: PRIMARY_PINK + '50', // Borda levemente rosa
-    },
-    editButton: {
-        position: 'absolute',
-        bottom: 0,
-        right: 0,
-        backgroundColor: PRIMARY_PINK,
-        width: 35,
-        height: 35,
-        borderRadius: 17.5,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 2,
-        borderColor: '#fff',
-        elevation: 5,
-    },
-
-    // NOME E EMAIL
-    userName: {
-        fontSize: 22,
-        fontWeight: '900',
-        color: TEXT_COLOR,
-        marginBottom: 2,
-    },
-    userEmail: {
-        fontSize: 14,
-        color: SECONDARY_TEXT_COLOR,
-        fontWeight: '500',
-        marginBottom: 10,
-    },
-
-    // ITENS DE MENU
-    menuContainer: {
-        marginHorizontal: 20,
-        backgroundColor: '#fff',
-        borderRadius: 20,
-        overflow: 'hidden',
-
-        // Sombra mais suave
-        shadowColor: TEXT_COLOR,
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.05,
-        shadowRadius: 10,
-        elevation: 3,
-        marginBottom: 10, // Para o scroll
-    },
-    menuItem: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: 15, // Padding ligeiramente menor
-        paddingHorizontal: 20,
-        borderBottomWidth: 0.5, // Linha mais fina
-        borderBottomColor: BORDER_COLOR,
-    },
-    menuItemLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    menuIcon: {
-        width: 30,
-        opacity: 0.8, // Ícones mais suaves
-    },
-    menuText: {
-        fontSize: 16,
-        fontWeight: '600',
-        marginLeft: 10,
-    },
-});
-
-// --- ESTILOS DO MODAL CUSTOMIZADO (ALERTE BONITO) ---
-const modalStyles = StyleSheet.create({
-    centeredView: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fundo escuro
-    },
-    modalView: {
-        margin: 20,
-        backgroundColor: "white",
-        borderRadius: 20,
-        padding: 35,
-        alignItems: "center",
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-        width: width * 0.85,
-    },
-    modalTitle: {
-        marginBottom: 15,
-        textAlign: "center",
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: TEXT_COLOR,
-    },
-    modalContent: {
-        marginBottom: 20,
-        textAlign: "center",
-        fontSize: 14,
-        color: SECONDARY_TEXT_COLOR,
-        fontWeight: '500',
-        lineHeight: 20,
-    },
-    modalButtons: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        width: '100%',
-        marginTop: 10,
-    },
-    button: {
-        borderRadius: 10,
-        paddingVertical: 12,
-        elevation: 2,
-        flex: 1,
-        marginHorizontal: 5,
-    },
-    buttonPrimary: {
-        backgroundColor: PRIMARY_PINK,
-    },
-    buttonClose: {
-        backgroundColor: BORDER_COLOR,
-    },
-    textStyle: {
-        color: "white",
-        fontWeight: "bold",
-        textAlign: "center",
-    }
+  // Botão de Logout
+  logoutButton: {
+    marginTop: 20,
+    backgroundColor: RED_ALERT,
+    paddingVertical: 15,
+    borderRadius: 15,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    shadowColor: RED_ALERT,
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  logoutButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+  },
 });
