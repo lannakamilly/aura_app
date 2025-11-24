@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,162 +9,343 @@ import {
   ScrollView,
   FlatList,
   Dimensions,
+  ActivityIndicator,
+  Modal,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from 'expo-linear-gradient';
+// Certifique-se de que o caminho abaixo está correto para sua configuração:
+import { supabase } from './supabase'; // Caminho ajustado para o contexto de onde este arquivo é executado
 
 const { width } = Dimensions.get("window");
+
 const BANNER_WIDTH = width - 40;
 const MAIN_PINK = "#ff86b4";
-const LIGHT_PINK = "#FDEFF1"; // Cor de fundo mais suave para o gradiente
-const VERY_LIGHT_PINK = "#fce3f7"; // Mantida, mas pouco usada
+const LIGHT_PINK = "#FDEFF1";
 const LIGHT_BG = "#fff";
 
 const HORIZONTAL_PADDING = 20;
-const PRODUCT_CARD_MARGIN = 15; // Diminuído o margin
+const PRODUCT_CARD_MARGIN = 15;
 const PRODUCT_CARD_WIDTH = (width - HORIZONTAL_PADDING * 2 - PRODUCT_CARD_MARGIN) / 2;
 
-// 1. IMPORTAÇÃO DA LOGO
+// ⚠️ Ajuste o caminho da imagem do logo
 const LOGO_IMAGE = require('../assets/auralogo.png');
 
+// ⚠️ Ajuste os caminhos das imagens de categoria 
 const categories = [
-  { name: "Skin Care", image: require('../assets/cate_skin.png') },
-  { name: "Maquiagem", image: require('../assets/cate_make.png') },
-  { name: "Cabelo", image: require('../assets/cate_cabelo.png') },
-  { name: "Perfume", image: require('../assets/cate_perfume.png') },
+  { name: "Skin Care", image: require('../assets/cate_skin.png'), screen: "CategoriaPele" },
+  { name: "Maquiagem", image: require('../assets/cate_make.png'), screen: "CategoriaMaquiagem" },
+  { name: "Cabelo", image: require('../assets/cate_cabelo.png'), screen: "CategoriaCabelo" },
+  { name: "Perfume", image: require('../assets/cate_perfume.png'), screen: "CategoriaPerfume" },
 ];
 
 const promotionBanners = [
-  {
-    id: 1,
-    title: "Ofertaa de Outono",
-    subtitle: "Até 30% OFF em Maquiagem.",
-    backgroundImage: "https://i.pinimg.com/736x/41/b5/27/41b527efe61cae9e5ede5b254cc5acc9.jpg",
-  },
-  {
-    id: 2,
-    title: "Dia da Beleza",
-    subtitle: "Frete Grátis acima de $150.",
-    backgroundImage: "https://i.pinimg.com/1200x/74/b6/81/74b681aaf4b8510f902aa4ab9d308445.jpg",
-  },
-  {
-    id: 3,
-    title: "Lançamento Exclusivo",
-    subtitle: "Novas coleções de Outono/Inverno.",
-    backgroundImage: "https://i.pinimg.com/1200x/72/11/63/7211633244957d3b93a8f8679205c4af.jpg",
-  },
+  { id: 1, title: "Ofertas de Outono", subtitle: "Até 30% OFF em Maquiagem.", backgroundImage: "https://i.pinimg.com/736x/41/b5/27/41b527efe61cae9e5ede5b254cc5acc9.jpg" },
+  { id: 2, title: "Dia da Beleza", subtitle: "Frete Grátis acima de $150.", backgroundImage: "https://i.pinimg.com/1200x/74/b6/81/74b681aaf4b8510f902aa4ab9d308445.jpg" },
+  { id: 3, title: "Lançamento Exclusivo", subtitle: "Novas coleções de Outono/Inverno.", backgroundImage: "https://i.pinimg.com/1200x/72/11/63/7211633244957d3b93a8f8679205c4af.jpg" },
 ];
 
-const products = [
-  { id: 1, name: "Gloss Fran By Franciny", newPrice: "R$59,67", image: require('../assets/prod.png'), rating: 4.8 },
-  { id: 2, name: "Casual T-Shirt Longa", newPrice: "$85.00", image: require('../assets/2.png'), rating: 4.5 },
-  { id: 3, name: "High-Waist Jeans", newPrice: "$149.00", image: require('../assets/3.png'), rating: 4.9 },
-  { id: 4, name: "Mineral Primer", newPrice: "$39.90", image: require('../assets/4.png'), rating: 4.2 },
-  { id: 5, name: "Silk Scarf", newPrice: "$45.00", image: require('../assets/5.png'), rating: 4.6 },
-  { id: 6, name: "Luxury Handbag",newPrice: "$250.00", image: require('../assets/6.png'), rating: 4.7 },
-  { id: 7, name: "Lipstick Set", newPrice: "$65.00", image: require('../assets/7.png'), rating: 4.3 },
-  { id: 8, name: "Sunscreen SPF50", newPrice: "$29.90", image: require('../assets/8.png'), rating: 4.1 },
-];
+// 🔑 ID mockado do usuário. 
+// ⚠️ Este ID deve ser um UUID VÁLIDO no Supabase
+const MOCK_USER_ID = '00000000-0000-0000-0000-000000000001'; 
 
+// ================================
+// COMPONENTE DO BANNER DE PROMOÇÃO
+// ================================
 const PromotionBanner = ({ item }) => (
-  <TouchableOpacity style={bannerStyles.bannerContainer}>
-    <Image
-      source={{ uri: item.backgroundImage }}
-      style={bannerStyles.backgroundImage}
-      resizeMode="cover"
-    />
-    <View style={bannerStyles.overlay}>
-      <Text style={bannerStyles.title}>{item.title}</Text>
-      <Text style={bannerStyles.subtitle}>{item.subtitle}</Text>
-      <TouchableOpacity style={bannerStyles.orderButton}>
-        <Text style={bannerStyles.orderButtonText}>Ver mais</Text>
-      </TouchableOpacity>
-    </View>
-  </TouchableOpacity>
+    <TouchableOpacity style={bannerStyles.bannerContainer}>
+      <Image
+        source={{ uri: item.backgroundImage }}
+        style={bannerStyles.backgroundImage}
+        resizeMode="cover"
+      />
+      <View style={bannerStyles.overlay}>
+        <Text style={bannerStyles.title}>{item.title}</Text>
+        <Text style={bannerStyles.subtitle}>{item.subtitle}</Text>
+        <TouchableOpacity style={bannerStyles.orderButton}>
+          <Text style={bannerStyles.orderButtonText}>Ver mais</Text>
+        </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
 );
 
-const ProductCard = ({ product }) => {
-  const [isFavorite, setIsFavorite] = useState(false);
+
+// ================================
+// LÓGICA DE DETALHES E CARRINHO (MODAL)
+// ================================
+const ProductDetailModal = ({ product, visible, onClose }) => {
+  const [quantity, setQuantity] = useState(1);
   const navigation = useNavigation();
 
-  const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
+  const getProductImageUrl = (path) => {
+    if (!path) return null;
+    return supabase.storage.from("produtos").getPublicUrl(path).data.publicUrl;
+  };
+  const imageUrl = getProductImageUrl(product?.image_path);
+  
+  // Lógica atualizada para adicionar/atualizar o carrinho no Supabase
+  const handleAddToCart = async () => {
+    if (!product || quantity <= 0) return;
+
+    const unitPrice = product.price;
+
+    // 1. Verificar se o item já existe no carrinho
+    const { data: existingCartItem, error: fetchError } = await supabase
+        .from('cart')
+        .select('*')
+        .eq('user_id', MOCK_USER_ID)
+        .eq('product_id', product.id)
+        .single();
+    
+    if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116: 'No rows found' (OK para continuar)
+        console.error("Erro ao verificar carrinho:", fetchError.message);
+        Alert.alert("Erro", "Não foi possível verificar o carrinho.");
+        return;
+    }
+
+    let error;
+
+    if (existingCartItem) {
+        // 2. Se existe, atualizar a quantidade
+        const newQuantity = existingCartItem.quantity + quantity;
+        const { error: updateError } = await supabase
+            .from('cart')
+            .update({ quantity: newQuantity })
+            .eq('user_id', MOCK_USER_ID)
+            .eq('product_id', product.id);
+        error = updateError;
+    } else {
+        // 3. Se não existe, inserir novo item
+        const { error: insertError } = await supabase
+            .from('cart')
+            .insert([
+                { 
+                    user_id: MOCK_USER_ID,
+                    product_id: product.id,
+                    quantity: quantity,
+                    price_unit: unitPrice,
+                }
+            ]);
+        error = insertError;
+    }
+
+    if (error) {
+        console.error("Erro ao adicionar/atualizar carrinho:", error.message);
+        Alert.alert("Erro", "Não foi possível adicionar o produto ao carrinho.");
+    } else {
+        Alert.alert("Sucesso!", `${quantity}x ${product.name} adicionado ao carrinho!`);
+        onClose(); 
+        // 🎯 CORREÇÃO: Redirecionamento para a tela 'Carrinho'
+        navigation.navigate('Carrinho'); 
+    }
   };
 
-  const handleCardPress = () => {
-    const screenName = product.id === 1 ? 'Produto' : `Produto${product.id}`;
-    navigation.navigate(screenName);
-  };
+  if (!product) return null;
 
   return (
-    <TouchableOpacity style={styles.productCard} onPress={handleCardPress}>
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={visible}
+      onRequestClose={onClose}
+    >
+      <View style={modalStyles.modalOverlay}>
+        <View style={modalStyles.modalContainer}>
+          
+          <TouchableOpacity style={modalStyles.closeButton} onPress={onClose}>
+            <Ionicons name="close" size={28} color="#333" />
+          </TouchableOpacity>
+
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {/* Imagem do Produto */}
+            <View style={modalStyles.imageContainer}>
+              <LinearGradient
+                colors={[LIGHT_PINK, '#fff']}
+                style={modalStyles.gradientOverlay}
+                start={{ x: 0.5, y: 0 }}
+                end={{ x: 0.5, y: 1 }}
+              >
+                {imageUrl ? (
+                  <Image source={{ uri: imageUrl }} style={modalStyles.productImage} resizeMode="contain" />
+                ) : (
+                  <Text>Sem imagem</Text>
+                )}
+              </LinearGradient>
+            </View>
+
+            {/* Detalhes */}
+            <View style={modalStyles.detailsContent}>
+              <Text style={modalStyles.productName}>{product.name}</Text>
+              <Text style={modalStyles.productPrice}>R$ {product.price.toFixed(2).replace('.', ',')}</Text>
+              
+              <View style={modalStyles.separator} />
+
+              <Text style={modalStyles.sectionTitle}>Descrição:</Text>
+              <Text style={modalStyles.productDescription}>{product.description}</Text>
+
+              <View style={modalStyles.separator} />
+
+              {/* Contador de Quantidade */}
+              <View style={modalStyles.quantityContainer}>
+                <Text style={modalStyles.sectionTitle}>Quantidade:</Text>
+                <View style={modalStyles.counterBox}>
+                  <TouchableOpacity 
+                    onPress={() => setQuantity(prev => Math.max(1, prev - 1))}
+                    style={modalStyles.counterButton}
+                  >
+                    <Ionicons name="remove" size={20} color={MAIN_PINK} />
+                  </TouchableOpacity>
+                  
+                  <Text style={modalStyles.quantityText}>{quantity}</Text>
+
+                  <TouchableOpacity 
+                    onPress={() => setQuantity(prev => prev + 1)}
+                    style={modalStyles.counterButton}
+                  >
+                    <Ionicons name="add" size={20} color={MAIN_PINK} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </ScrollView>
+
+          {/* Botão Adicionar ao Carrinho */}
+          <View style={modalStyles.footer}>
+            <TouchableOpacity 
+              style={modalStyles.cartButton}
+              onPress={handleAddToCart}
+            >
+              <Ionicons name="cart" size={22} color="#fff" style={{ marginRight: 10 }} />
+              <Text style={modalStyles.cartButtonText}>
+                Adicionar {quantity} item(s) (R$ {(product.price * quantity).toFixed(2).replace('.', ',')})
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
+
+// ================================
+// CARD DO PRODUTO (Lógica de Favoritos Funcionando)
+// ================================
+const ProductCard = ({ product, onCardPress }) => {
+  const [isFavorite, setIsFavorite] = useState(false);
+  
+  // 1. Checa o status inicial de favorito
+  const checkInitialFavorite = useCallback(async () => {
+      // ** Requer que a tabela 'favorites' exista e tenha RLS (SELECT) configurado **
+      const { data } = await supabase
+          .from('favorites') 
+          .select('id')
+          .eq('user_id', MOCK_USER_ID)
+          .eq('product_id', product.id) 
+          .single();
+      
+      setIsFavorite(!!data); 
+  }, [product.id]);
+
+  useEffect(() => {
+      checkInitialFavorite();
+  }, [checkInitialFavorite]);
+
+  // 2. Função para adicionar/remover dos favoritos
+  const toggleFavorite = async () => {
+      if (isFavorite) {
+          // Remove (DELETE)
+          const { error } = await supabase
+              .from('favorites')
+              .delete()
+              .eq('user_id', MOCK_USER_ID)
+              .eq('product_id', product.id);
+          
+          if (!error) {
+              setIsFavorite(false);
+          } else {
+              console.error("Erro ao remover favorito:", error.message);
+              Alert.alert("Erro", "Não foi possível remover dos favoritos. Verifique as permissões (RLS DELETE).");
+          }
+      } else {
+          // Adiciona (INSERT)
+          const { error } = await supabase
+              .from('favorites')
+              .insert([{ user_id: MOCK_USER_ID, product_id: product.id }]);
+
+          if (!error) {
+              setIsFavorite(true);
+          } else {
+              console.error("Erro ao adicionar favorito:", error.message);
+              Alert.alert("Erro", "Não foi possível adicionar aos favoritos. Verifique os tipos de dados (UUIDs) e as permissões (RLS INSERT).");
+          }
+      }
+  };
+
+  const imageUrl = product.image_path 
+    ? supabase.storage.from("produtos").getPublicUrl(product.image_path).data.publicUrl
+    : null;
+
+  return (
+    <TouchableOpacity style={styles.productCard} onPress={() => onCardPress(product)}>
       <View style={styles.productImageBackground}>
-        {/* ALTERAÇÃO: Usando LIGHT_PINK para um gradiente mais suave */}
         <LinearGradient
           colors={[LIGHT_PINK, '#fff']}
           style={styles.gradientOverlay}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
         >
-          <Image
-            source={product.image}
-            style={styles.productImage}
-            resizeMode="contain"
-          />
+          {imageUrl ? (
+            <Image 
+              source={{ uri: imageUrl }} 
+              style={styles.productImage} 
+              resizeMode="contain" 
+            />
+          ) : (
+            <Text>Sem imagem</Text>
+          )}
         </LinearGradient>
       </View>
 
-      {/* ALTERAÇÃO: Posicionamento mais sutil do botão de favorito */}
       <TouchableOpacity onPress={toggleFavorite} style={styles.favoriteButton}>
-        <Ionicons
-          // ALTERAÇÃO: Usa outline quando não está favoritado
-          name={isFavorite ? 'heart' : 'heart-outline'}
-          size={22}
-          color={MAIN_PINK}
-        />
+        <Ionicons name={isFavorite ? 'heart' : 'heart-outline'} size={22} color={MAIN_PINK} />
       </TouchableOpacity>
 
       <View style={styles.productDetails}>
-        {/* NOVO: Container para Nome e Avaliação */}
         <View style={styles.nameRatingRow}>
           <Text style={styles.productName} numberOfLines={2}>
             {product.name}
           </Text>
           <View style={styles.ratingContainer}>
             <Ionicons name="star" size={14} color="#FFD700" />
-            <Text style={styles.ratingText}>{product.rating ? product.rating.toFixed(1) : '4.5'}</Text>
+            <Text style={styles.ratingText}>4.5</Text> 
           </View>
         </View>
         
         <View style={styles.priceContainer}>
-          {/* Ocultado originalPrice se não houver 'price' no objeto product */}
-          {product.price && (
-             <Text style={styles.originalPrice}>
-               {product.price}
-             </Text>
-          )}
-          <Text style={styles.currentPrice}>{product.newPrice}</Text>
+          <Text style={styles.currentPrice}>R$ {product.price.toFixed(2).replace('.', ',')}</Text>
         </View>
-
       </View>
     </TouchableOpacity>
   );
 };
 
+
+// ================================
+// CARD DE CATEGORIA 
+// ================================
 const CategoryCard = ({ item }) => {
   const navigation = useNavigation();
 
   const handlePress = () => {
-    const screenMap = {
-      "Skin Care": "CategoriaPele",
-      "Maquiagem": "CategoriaMaquiagem",
-      "Cabelo": "CategoriaCabelo",
-      "Perfume": "CategoriaPerfume",
-    };
-
-    const screenName = screenMap[item.name] || "CategoriaPeleScreen";
-    navigation.navigate(screenName);
+    const screenName = item.screen;
+    if (screenName) {
+      // ⚠️ Navegação para a tela da categoria (verifique o nome da rota)
+      navigation.navigate(screenName, { categoryName: item.name }); 
+    }
   };
 
   return (
@@ -183,15 +364,59 @@ const CategoryCard = ({ item }) => {
   );
 };
 
-export default function HomeScreen() {
-  const navigation = useNavigation();
-  const [searchText, setSearchText] = useState("");
-  const [activeIndex, setActiveIndex] = useState(0);
 
+// ================================
+// TELA PRINCIPAL
+// ================================
+export default function HomeScreen() {
+  const [searchText, setSearchText] = useState("");
+  const [activeIndex, setActiveIndex] = useState(0); 
+  
+  const [products, setProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const navigation = useNavigation();
+
+  // Função para buscar produtos do Supabase
+  const fetchProducts = async () => {
+    setLoadingProducts(true);
+    
+    // Busca os produtos marcados como 'is_home: true'
+    const { data, error } = await supabase
+      .from("products") 
+      .select("*")
+      .eq('is_home', true)
+      .limit(6);
+
+    if (!error) {
+      setProducts(data);
+    } else {
+      console.error("Erro ao buscar produtos:", error.message);
+    }
+    setLoadingProducts(false);
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+  
+  const handleCardPress = (product) => {
+    setSelectedProduct(product);
+    setModalVisible(true);
+  };
+
+  // 🎯 Navega para a tela de Favoritos
   const handleFavoritesPress = () => {
     navigation.navigate('Favoritos');
   };
+  
+  const handleViewAllProducts = () => {
+    navigation.navigate('TodosProdutos'); 
+  };
 
+  // Função de scroll para atualizar o indicador
   const onScroll = (event) => {
     const slideSize = event.nativeEvent.layoutMeasurement.width;
     const index = event.nativeEvent.contentOffset.x / slideSize;
@@ -201,33 +426,24 @@ export default function HomeScreen() {
     }
   };
 
-  // Usando a instrução salva: o paddingBottom: 100 no scrollViewContent já está reservando o espaço para a tab navigation.
 
   return (
     <ScrollView
       style={styles.container}
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={styles.scrollViewContent}
+      // contentContainerStyle ajustado para a tab navigation
+      contentContainerStyle={styles.scrollViewContent} 
     >
       <View style={styles.topBackground} />
 
-      {/* MODIFICADO: searchBarContainer agora usa justifyContent: 'center' */}
+      {/* ===================== LOGO & SEARCH ===================== */}
       <View style={styles.searchBarContainer}>
-        <Image
-          source={LOGO_IMAGE}
-          style={styles.logoImage}
-          resizeMode="contain"
-        />
+        <Image source={LOGO_IMAGE} style={styles.logoImage} resizeMode="contain" />
       </View>
 
       <View style={styles.searchFilterRow}>
         <View style={styles.searchBox}>
-          <Ionicons
-            name="search"
-            size={20}
-            color="#999"
-            style={styles.searchIcon}
-          />
+          <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
           <TextInput
             placeholder="Pesquisar produtos..."
             placeholderTextColor="#999"
@@ -236,17 +452,15 @@ export default function HomeScreen() {
             onChangeText={setSearchText}
           />
         </View>
-        <TouchableOpacity
-          style={styles.filterButton}
-          onPress={handleFavoritesPress}
-        >
+        <TouchableOpacity style={styles.filterButton} onPress={handleFavoritesPress}>
           <Ionicons name="heart-outline" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
 
+      {/* ===================== BANNERS COM INDICADORES ===================== */}
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Ofertas Especiais</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleViewAllProducts}>
           <Text style={styles.seeAllText}>Ver Todas</Text>
         </TouchableOpacity>
       </View>
@@ -261,7 +475,7 @@ export default function HomeScreen() {
           decelerationRate="fast"
           renderItem={({ item }) => <PromotionBanner item={item} />}
           contentContainerStyle={styles.carouselList}
-          onScroll={onScroll}
+          onScroll={onScroll} 
         />
         <View style={styles.indicatorContainer}>
           {promotionBanners.map((_, index) => (
@@ -278,9 +492,10 @@ export default function HomeScreen() {
         </View>
       </View>
 
+      {/* ===================== CATEGORIAS ===================== */}
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Categorias</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleViewAllProducts}>
           <Text style={styles.seeAllText}>Ver Todas</Text>
         </TouchableOpacity>
       </View>
@@ -293,344 +508,457 @@ export default function HomeScreen() {
         contentContainerStyle={styles.categoryList}
       />
 
+      {/* ===================== PRODUTOS (DO SUPABASE) ===================== */}
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Recomendado Para Você</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleViewAllProducts}>
           <Text style={styles.seeAllText}>Ver Todos</Text>
         </TouchableOpacity>
       </View>
-      <View style={styles.productsGrid}>
-        {products.map((item) => (
-          <ProductCard key={item.id} product={item} />
-        ))}
-      </View>
+      
+      {loadingProducts ? (
+        <ActivityIndicator size="large" color={MAIN_PINK} style={{ marginTop: 20 }} />
+      ) : (
+        <View style={styles.productsGrid}>
+          {products.map((item) => (
+            <ProductCard key={item.id} product={item} onCardPress={handleCardPress} />
+          ))}
+        </View>
+      )}
+
+      <View style={{ height: 20 }} /> 
+      
+      {/* MODAL DE DETALHES DO PRODUTO */}
+      <ProductDetailModal
+        product={selectedProduct}
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+      />
     </ScrollView>
   );
 }
 
+// ================================
+// ESTILOS DE BANNER (Separados)
+// ================================
 const bannerStyles = StyleSheet.create({
-  bannerContainer: {
-    width: BANNER_WIDTH,
-    height: 180,
-    marginRight: 15,
-    borderRadius: 25,
-    overflow: "hidden",
-    backgroundColor: MAIN_PINK,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
-    shadowRadius: 15,
-    elevation: 10,
-  },
-  backgroundImage: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    padding: 20,
-    justifyContent: "space-between",
-    backgroundColor: "rgba(0, 0, 0, 0.1)",
-  },
-  title: {
-    color: "#fff",
-    fontSize: 24,
-    fontWeight: "900",
-    textShadowColor: "rgba(0, 0, 0, 0.5)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
-  },
-  subtitle: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "600",
-    textShadowColor: "rgba(0, 0, 0, 0.4)",
-    textShadowOffset: { width: 0.5, height: 0.5 },
-    textShadowRadius: 1,
-  },
-  orderButton: {
-    backgroundColor: "#fff",
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 15,
-    alignSelf: "flex-start",
-  },
-  orderButtonText: {
-    color: MAIN_PINK,
-    fontWeight: "700",
-    fontSize: 14,
-  },
+    bannerContainer: {
+        width: BANNER_WIDTH,
+        height: 180,
+        marginRight: 15,
+        borderRadius: 25,
+        overflow: "hidden",
+        backgroundColor: MAIN_PINK,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.25,
+        shadowRadius: 15,
+        elevation: 10,
+    },
+    backgroundImage: {
+        ...StyleSheet.absoluteFillObject,
+    },
+    overlay: {
+        ...StyleSheet.absoluteFillObject,
+        padding: 20,
+        justifyContent: "space-between",
+        backgroundColor: "rgba(0, 0, 0, 0.1)",
+    },
+    title: {
+        color: "#fff",
+        fontSize: 24,
+        fontWeight: "900",
+        textShadowColor: "rgba(0, 0, 0, 0.5)",
+        textShadowOffset: { width: 1, height: 1 },
+        textShadowRadius: 3,
+    },
+    subtitle: {
+        color: "#fff",
+        fontSize: 14,
+        fontWeight: "600",
+        textShadowColor: "rgba(0, 0, 0, 0.4)",
+        textShadowOffset: { width: 0.5, height: 0.5 },
+        textShadowRadius: 1,
+    },
+    orderButton: {
+        backgroundColor: "#fff",
+        paddingVertical: 8,
+        paddingHorizontal: 15,
+        borderRadius: 15,
+        alignSelf: "flex-start",
+    },
+    orderButtonText: {
+        color: MAIN_PINK,
+        fontWeight: "700",
+        fontSize: 14,
+    },
 });
 
+// ================================
+// ESTILOS DE PRODUTO E GERAIS
+// ================================
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: LIGHT_BG,
-  },
-  // O 'paddingBottom: 100' está reservando espaço para a tab navigation, conforme sua instrução salva.
-  scrollViewContent: {
-    paddingBottom: 100,
-  },
+    container: {
+        flex: 1,
+        backgroundColor: LIGHT_BG,
+    },
+    scrollViewContent: {
+        // Espaço para a tab navigation (Lembrado do histórico)
+        paddingBottom: 100, 
+    },
 
-  topBackground: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 175,
-    backgroundColor: LIGHT_PINK,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-  },
+    topBackground: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 175,
+        backgroundColor: LIGHT_PINK,
+        borderBottomLeftRadius: 30,
+        borderBottomRightRadius: 30,
+    },
 
-  searchBarContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: HORIZONTAL_PADDING,
-    paddingTop: 50,
-  },
-  
-  logoImage: {
-    width: 140,
-    height: 50,
+    searchBarContainer: {
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        paddingHorizontal: HORIZONTAL_PADDING,
+        paddingTop: 50,
+    },
+    logoImage: {
+        width: 140,
+        height: 50,
+        resizeMode: 'contain',
+    },
+
+    searchFilterRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingHorizontal: HORIZONTAL_PADDING,
+        paddingBottom: 20,
+        marginTop: 10,
+        zIndex: 5,
+    },
+    searchBox: {
+        flexDirection: "row",
+        alignItems: "center",
+        flex: 1,
+        height: 48,
+        backgroundColor: "#fff",
+        borderRadius: 24,
+        paddingHorizontal: 15,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    searchIcon: {
+        marginRight: 10,
+        color: "#B0B0B0",
+    },
+    searchInput: {
+        flex: 1,
+        fontSize: 16,
+        color: "#000",
+    },
+    filterButton: {
+        marginLeft: 15,
+        backgroundColor: MAIN_PINK,
+        padding: 12,
+        borderRadius: 18,
+        shadowColor: MAIN_PINK,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
+        elevation: 5,
+    },
+
+    sectionHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingHorizontal: HORIZONTAL_PADDING,
+        marginBottom: 15,
+        marginTop: 10,
+    },
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: "800",
+        color: "#000",
+    },
+    seeAllText: {
+        fontSize: 14,
+        fontWeight: "600",
+        color: MAIN_PINK,
+    },
+
+    carouselContainer: {
+        marginBottom: 30,
+    },
+    carouselList: {
+        paddingHorizontal: HORIZONTAL_PADDING,
+    },
+    indicatorContainer: {
+        flexDirection: "row",
+        justifyContent: "center",
+        marginTop: 15,
+    },
+    indicator: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        marginHorizontal: 4,
+    },
+    activeIndicator: {
+        backgroundColor: MAIN_PINK,
+        width: 20,
+    },
+    inactiveIndicator: {
+        backgroundColor: "#ccc",
+    },
+
+    categoryList: {
+        paddingHorizontal: HORIZONTAL_PADDING,
+        marginBottom: 30,
+    },
+    categoryCard: {
+        alignItems: "center",
+        marginRight: 20,
+        width: 75,
+    },
+    categoryIconCircle: {
+        width: 70,
+        height: 70,
+        borderRadius: 35, // ⬅️ Mantém o formato de bolinha
+        backgroundColor: LIGHT_PINK,
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom: 5,
+        // 🎯 SEM BORDAS, CONFORME SOLICITADO
+    },
+    categoryImage: {
+        width: 50,
+        height: 50,
+    },
+    categoryName: {
+        fontSize: 12,
+        fontWeight: "600",
+        color: "#333",
+        textAlign: "center",
+    },
+
+    // ESTILOS DO CARD DE PRODUTO
+    productsGrid: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "space-between",
+        paddingHorizontal: HORIZONTAL_PADDING,
+    },
+    productCard: {
+        width: PRODUCT_CARD_WIDTH,
+        marginBottom: PRODUCT_CARD_MARGIN,
+        backgroundColor: "#fff",
+        borderRadius: 15,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+        overflow: 'hidden',
+    },
+    productImageBackground: {
+        width: '100%',
+        height: PRODUCT_CARD_WIDTH,
+        borderTopLeftRadius: 15,
+        borderTopRightRadius: 15,
+        overflow: 'hidden',
+    },
+    gradientOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 10,
+    },
+    productImage: {
+        width: '100%',
+        height: '100%',
+    },
+    favoriteButton: {
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+        borderRadius: 15,
+        padding: 4,
+    },
+    productDetails: {
+        padding: 10,
+    },
+    nameRatingRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        minHeight: 40, 
+    },
+    productName: {
+        fontSize: 14,
+        fontWeight: "600",
+        color: "#333",
+        flex: 1,
+        paddingRight: 5,
+    },
+    ratingContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: LIGHT_PINK,
+        borderRadius: 8,
+        paddingHorizontal: 4,
+        paddingVertical: 2,
+    },
+    ratingText: {
+        fontSize: 10,
+        fontWeight: '700',
+        color: MAIN_PINK,
+        marginLeft: 2,
+    },
+    priceContainer: {
+        marginTop: 5,
+        alignSelf: 'flex-start',
+    },
+    currentPrice: {
+        fontSize: 16,
+        fontWeight: "800",
+        color: MAIN_PINK,
+    },
+    oldPrice: {
+        fontSize: 12,
+        color: "#999",
+        textDecorationLine: "line-through",
+        marginLeft: 5,
+    },
+});
+
+
+// ================================
+// ESTILOS DO MODAL
+// ================================
+const modalStyles = StyleSheet.create({
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'flex-end',
+    },
+    modalContainer: {
+        backgroundColor: '#fff',
+        width: '100%',
+        height: '80%',
+        borderTopLeftRadius: 30,
+        borderTopRightRadius: 30,
+        paddingTop: 15,
+    },
+    closeButton: {
+        position: 'absolute',
+        top: 15,
+        right: 15,
+        zIndex: 10,
+        backgroundColor: '#fff',
+        borderRadius: 20,
+        padding: 5,
+    },
+
+    imageContainer: {
+        width: '100%',
+        height: 300,
+        paddingHorizontal: 20,
+    },
+    gradientOverlay: {
+        flex: 1,
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    productImage: {
+        width: '80%',
+        height: '80%',
+    },
+
+    detailsContent: {
+        padding: 20,
+    },
+    productName: {
+        fontSize: 26,
+        fontWeight: '900',
+        color: '#333',
+        marginBottom: 5,
+    },
+    productPrice: {
+        fontSize: 22,
+        fontWeight: '800',
+        color: MAIN_PINK,
+    },
+    separator: {
+        height: 1,
+        backgroundColor: '#eee',
+        marginVertical: 15,
+    },
+    sectionTitle: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#333',
+        marginBottom: 10,
+    },
+    productDescription: {
+        fontSize: 14,
+        color: '#666',
+        lineHeight: 20,
+    },
     
-    resizeMode: 'contain',
-  },
+    quantityContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 10,
+    },
+    counterBox: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: LIGHT_PINK,
+        borderRadius: 20,
+    },
+    counterButton: {
+        padding: 10,
+    },
+    quantityText: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#333',
+        paddingHorizontal: 10,
+    },
 
-  searchFilterRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: HORIZONTAL_PADDING,
-    paddingBottom: 20,
-    marginTop: 10,
-    zIndex: 5,
-  },
-  searchBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-    height: 48,
-    backgroundColor: "#fff",
-    borderRadius: 24,
-    paddingHorizontal: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  searchIcon: {
-    marginRight: 10,
-    color: "#B0B0B0",
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    color: "#000",
-  },
-  filterButton: {
-    marginLeft: 15,
-    backgroundColor: MAIN_PINK,
-    padding: 12,
-    borderRadius: 18,
-    shadowColor: MAIN_PINK,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5,
-  },
-
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: HORIZONTAL_PADDING,
-    marginBottom: 15,
-    marginTop: 10,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: "#000",
-  },
-  seeAllText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: MAIN_PINK,
-  },
-
-  carouselContainer: {
-    marginBottom: 30,
-  },
-  carouselList: {
-    paddingHorizontal: HORIZONTAL_PADDING,
-  },
-  indicatorContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 15,
-  },
-  indicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginHorizontal: 4,
-  },
-  activeIndicator: {
-    backgroundColor: MAIN_PINK,
-    width: 20,
-  },
-  inactiveIndicator: {
-    backgroundColor: "#ccc",
-  },
-
-  categoryList: {
-    paddingHorizontal: HORIZONTAL_PADDING,
-    marginBottom: 30,
-  },
-  categoryCard: {
-    alignItems: "center",
-    width: width / 5, 
-    marginRight: 15,
-  },
-  categoryIconCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: LIGHT_PINK,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 8,
-    overflow: 'hidden',
-  },
-  categoryImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  categoryName: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#555",
-    textAlign: "center",
-    // NOVO: Limitando a 2 linhas para evitar quebra de layout
-    numberOfLines: 2, 
-    minHeight: 28, 
-  },
-
-  productsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    paddingHorizontal: HORIZONTAL_PADDING,
-  },
-
-  // ESTILOS DO CARD DE PRODUTO OTIMIZADOS
-  productCard: {
-    width: PRODUCT_CARD_WIDTH,
-    marginBottom: PRODUCT_CARD_MARGIN + 5, // Aumentado um pouco o espaço entre as linhas
-    backgroundColor: '#fff',
-    // NOVO: Aumentado o border radius
-    borderRadius: 25, 
-    shadowColor: '#000',
-    // NOVO: Sombra mais suave e elevada
-    shadowOffset: { width: 0, height: 8 }, 
-    shadowOpacity: 0.1, 
-    shadowRadius: 12, 
-    elevation: 10,
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  productImageBackground: {
-    width: '100%',
-    height: 160,
-    // NOVO: Permite que a imagem e o gradiente sigam o borderRadius do card
-    borderTopLeftRadius: 25, 
-    borderTopRightRadius: 25,
-    overflow: 'hidden',
-  },
-  gradientOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  productImage: {
-    width: '80%',
-    height: '80%',
-  },
-  favoriteButton: {
-    position: 'absolute',
-    top: 15,
-    right: 15,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    // NOVO: Sombra sutil para o botão de favorito
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.15,
-    shadowRadius: 2,
-    elevation: 4,
-    zIndex: 10,
-  },
-  productDetails: {
-    paddingHorizontal: 12,
-    paddingBottom: 15,
-    paddingTop: 10,
-  },
-  
-  // NOVO: Linha para Nome e Avaliação (topo dos detalhes)
-  nameRatingRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 5,
-  },
-  productName: {
-    fontSize: 16,
-    // NOVO: Font weight um pouco mais leve, mas ainda forte
-    fontWeight: '700', 
-    color: '#333',
-    // NOVO: Garante que o nome não empurre outros elementos
-    flex: 1,
-    marginRight: 10,
-    minHeight: 40, // Espaço para 2 linhas (ex: ~20px por linha)
-  },
-  
-  priceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    // NOVO: Removido margin bottom para destacar mais o preço
-    marginBottom: 0, 
-    marginTop: 5,
-  },
-  originalPrice: {
-    fontSize: 14,
-    color: '#a1a1aa',
-    textDecorationLine: 'line-through',
-    marginRight: 8,
-    fontWeight: '500',
-  },
-  currentPrice: {
-    fontSize: 19,
-    fontWeight: '900', // Mais forte para o preço atual
-    color: MAIN_PINK,
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: LIGHT_PINK, // Fundo sutil para a classificação
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    borderRadius: 10,
-  },
-  ratingText: {
-    fontSize: 13,
-    color: '#333',
-    marginLeft: 3,
-    fontWeight: '600',
-  },
+    footer: {
+        padding: 20,
+        borderTopWidth: 1,
+        borderTopColor: '#f0f0f0',
+        backgroundColor: '#fff',
+    },
+    cartButton: {
+        backgroundColor: MAIN_PINK,
+        borderRadius: 25,
+        paddingVertical: 15,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: MAIN_PINK,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
+        elevation: 5,
+    },
+    cartButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '700',
+    },
 });

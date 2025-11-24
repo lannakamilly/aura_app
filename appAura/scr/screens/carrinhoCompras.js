@@ -1,449 +1,450 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, ScrollView, Alert } from 'react-native';
-import { Ionicons } from '@expo/vector-icons'; 
+import React, { useState, useEffect, useCallback } from 'react';
+import { 
+    View, 
+    Text, 
+    FlatList, 
+    TouchableOpacity, 
+    StyleSheet, 
+    ActivityIndicator, 
+    Alert,
+    Image 
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 
-// --- CONFIGURAÇÃO DE ESTILO E CORES ---
-const PRIMARY_PINK = '#ff86b5'; 
-const ACCENT_RED = '#000000ff'; // Usado para remoção
-const SOFT_PINK = '#FFF0F5'; 
-const TEXT_COLOR = '#111827'; 
-const SECONDARY_TEXT_COLOR = '#6B7280'; 
-const BACKGROUND_GREY = '#F9FAFB'; 
-const BORDER_COLOR = '#E5E7EB'; 
+// ⚠️ Ajuste o caminho para o seu arquivo supabase
+import { supabase } from './supabase'; 
 
-// Dados mockados (limpeza do código original do usuário)
-const initialCart = [
-    {
-        id: 1,
-        name: 'Ácido Glicólico',
-        desc: 'Sérum esfoliante para renovação da pele.', // Descrição mais clara
-        price: 150,
-        quantity: 1,
-        image: 'https://res.cloudinary.com/beleza-na-web/image/upload/w_1500,f_auto,fl_progressive,q_auto:eco,w_800/v1/imagens/product/E2022020201/2f88ec40-3be3-497a-898c-22b1d9d5d9f5-kit-eudora-siage-cica-therapy-completo-4-produtos.png',
-    },
-    {
-        id: 2,
-        name: 'Manteiga Corporal',
-        desc: 'Hidratação intensiva e aroma suave de baunilha.',
-        price: 40,
-        quantity: 2,
-        image: 'https://acdn-us.mitiendanube.com/stores/004/599/657/products/frutas-4a762a9858af81d12117272424982864-640-0.png',
-    },
-    {
-        id: 3,
-        name: 'Leite de Amêndoas',
-        desc: 'Loção facial de limpeza eficaz para pele oleosa.',
-        price: 60,
-        quantity: 1,
-        image: 'https://acdn-us.mitiendanube.com/stores/004/599/657/products/leite-de-amendoas-ac405a9541ac122f4117276692711299-1024-1024.png',
-    },
-    {
-        id: 4,
-        name: 'Protetor Solar FPS 50',
-        desc: 'Proteção UVA/UVB com toque seco e acabamento matte.',
-        price: 70,
-        quantity: 1,
-        image: 'https://drogariaspacheco.vteximg.com.br/arquivos/ids/1366684-1000-1000/844713---Kit-Eudora-Siage-Nutri-Rose-Shampoo-250ml-+-Condicionador-125ml-+-Leave-In-30ml_0000_Layer-2.png.png?v=638687649630000000',
-    },
-];
+const MOCK_USER_ID = '00000000-0000-0000-0000-000000000001'; 
+const MAIN_PINK = "#ff86b4";
+const LIGHT_PINK = "#FDEFF1";
 
-export default function CartScreen({ navigation }) {
-    const [cart, setCart] = useState(initialCart);
+// ================================
+// LÓGICA DE ATUALIZAÇÃO DO SUPABASE
+// ================================
 
-    // Atualiza quantidade
-    const updateQuantity = (id, type) => {
-        setCart((prevCart) =>
-            prevCart.map((item) => {
-                if (item.id === id) {
-                    let newQty = type === 'add' ? item.quantity + 1 : item.quantity - 1;
-                    if (newQty < 1) {
-                        return null; // Marca para remoção se a quantidade for zero
-                    }
-                    return { ...item, quantity: newQty };
-                }
-                return item;
-            }).filter(Boolean) // Remove os itens marcados como null
-        );
+const updateItemQuantity = async (itemId, newQuantity) => {
+    // Se a quantidade for zero, o item será removido.
+    if (newQuantity <= 0) {
+        return await supabase
+            .from('cart')
+            .delete()
+            .eq('id', itemId);
+    }
+    
+    // Se for maior que zero, atualiza.
+    return await supabase
+        .from('cart')
+        .update({ quantity: newQuantity })
+        .eq('id', itemId);
+};
+
+// ================================
+// COMPONENTE DO CARD DE ITEM (NOVO DESIGN)
+// ================================
+const CartItemCard = React.memo(({ item, onRemoveItem, onQuantityChange }) => {
+    const itemSubtotal = item.quantity * item.price_unit;
+    const product = item.products;
+
+    if (!product) return null;
+
+    const getProductImageUrl = (path) => {
+        if (!path) return null;
+        return supabase.storage.from("produtos").getPublicUrl(path).data.publicUrl;
     };
-
-    // Remove produto
-    const removeItem = (id) => {
-        // No React Native, é melhor usar um modal customizado, mas aqui usamos Alert para simplificar a confirmação
-        Alert.alert(
-            "Remover Item",
-            "Deseja realmente remover este produto do seu carrinho?",
-            [
-                { text: "Cancelar", style: "cancel" },
-                {
-                    text: "Remover",
-                    onPress: () => {
-                        setCart((prev) => prev.filter((item) => item.id !== id));
-                    },
-                    style: 'destructive',
-                },
-            ],
-            { cancelable: true }
-        );
-    };
-
-    // Total
-    const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const frete = subtotal > 200 ? 0 : 25; // Exemplo: frete grátis acima de R$ 200
-    const total = subtotal + frete;
-
-    // Componente de Item do Carrinho (refinado)
-    const CartItem = ({ item }) => (
-        <View style={styles.itemCard}>
+    const imageUrl = getProductImageUrl(product.image_path);
+    
+    return (
+        <View style={styles.card}>
             {/* 1. Imagem */}
-            <View style={styles.imageContainer}>
-                <Image 
-                    source={{ uri: item.image }} 
-                    style={styles.itemImage} 
-                />
+            <View style={styles.imageWrapper}>
+                {imageUrl ? (
+                    <Image 
+                        source={{ uri: imageUrl }} 
+                        style={styles.productImage} 
+                        resizeMode="contain" 
+                    />
+                ) : (
+                    <Ionicons name="image-outline" size={40} color="#ccc" />
+                )}
             </View>
-            
-            {/* 2. Detalhes e Preço */}
+
+            {/* 2. Detalhes e Controles */}
             <View style={styles.itemDetails}>
-                <Text style={styles.itemName} numberOfLines={2}>{item.name}</Text>
-                <Text style={styles.itemDesc} numberOfLines={2}>{item.desc}</Text>
+                <Text style={styles.itemName} numberOfLines={2}>{product.name}</Text>
                 
-                {/* Preço Unitário (Adicionado para clareza) */}
-                <Text style={styles.itemPriceUnit}>R$ {item.price.toFixed(2)}/un.</Text>
-            </View>
-            
-            {/* 3. Ações (Quantidade e Remover) */}
-            <View style={styles.itemActions}>
-                {/* Ícone de Remover (Topo) */}
-                <TouchableOpacity style={styles.removeIcon} onPress={() => removeItem(item.id)}>
-                    <Ionicons name="trash-outline" size={24} color={ACCENT_RED} />
-                </TouchableOpacity>
+                {/* Preço Unitário e Subtotal */}
+                <View style={styles.priceRow}>
+                    <Text style={styles.itemUnit}>(R$ {item.price_unit.toFixed(2).replace('.', ',')} / un.)</Text>
+                    <Text style={styles.itemSubtotal}>
+                        R$ {itemSubtotal.toFixed(2).replace('.', ',')}
+                    </Text>
+                </View>
 
-                {/* Controle de Quantidade (Fundo) */}
-                <View style={styles.qtyContainer}>
-                    <TouchableOpacity
-                        onPress={() => updateQuantity(item.id, 'sub')}
-                        style={styles.qtyButton}
+                {/* Contador e Botão de Remover */}
+                <View style={styles.quantityControlRow}>
+                    {/* Botões de Quantidade */}
+                    <View style={styles.counterBox}>
+                        <TouchableOpacity 
+                            onPress={() => onQuantityChange(item.id, item.quantity - 1, product.name)}
+                            style={styles.counterButton}
+                            disabled={item.quantity <= 1} // Desabilita se for 1 para forçar o botão de lixo
+                        >
+                            <Ionicons name="remove-outline" size={20} color={MAIN_PINK} />
+                        </TouchableOpacity>
+                        
+                        <Text style={styles.quantityText}>{item.quantity}</Text>
+
+                        <TouchableOpacity 
+                            onPress={() => onQuantityChange(item.id, item.quantity + 1, product.name)}
+                            style={styles.counterButton}
+                        >
+                            <Ionicons name="add-outline" size={20} color={MAIN_PINK} />
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* Botão de Remover (Lixeira) */}
+                    <TouchableOpacity 
+                        style={styles.removeButton} 
+                        onPress={() => onRemoveItem(item.id, product.name)}
                     >
-                        <Ionicons name="remove-outline" size={18} color={PRIMARY_PINK} />
-                    </TouchableOpacity>
-
-                    <Text style={styles.qtyNumber}>{item.quantity}</Text>
-
-                    <TouchableOpacity
-                        onPress={() => updateQuantity(item.id, 'add')}
-                        style={styles.qtyButton}
-                    >
-                        <Ionicons name="add-outline" size={18} color={PRIMARY_PINK} />
+                        <Ionicons name="trash-outline" size={22} color="#F00" />
                     </TouchableOpacity>
                 </View>
             </View>
         </View>
     );
+});
+
+
+// ================================
+// TELA PRINCIPAL DO CARRINHO
+// ================================
+export default function CarrinhoScreen() {
+    const [cartItems, setCartItems] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const isFocused = useIsFocused();
     
-    // Função de checkout
-    const handleCheckout = () => {
-        if (cart.length === 0) {
-             Alert.alert("Carrinho Vazio", "Adicione itens antes de prosseguir para o pagamento.");
-             return;
+    // Função de fetch corrigida (mantida)
+    const fetchCart = useCallback(async () => {
+        setLoading(true);
+        const { data: cartItemsData, error } = await supabase
+            .from('cart')
+            .select(`
+                id,
+                quantity,
+                price_unit,
+                products:product_id(
+                    id,
+                    name,
+                    description,
+                    image_path
+                )
+            `)
+            .eq('user_id', MOCK_USER_ID);
+
+        if (!error) {
+            const validItems = cartItemsData.filter(item => item.products); 
+            setCartItems(validItems);
+        } else {
+            console.error("Erro ao buscar carrinho:", error.message);
+            Alert.alert("Erro de Consulta", "Não foi possível carregar os itens do carrinho.");
         }
-        if (navigation) {
-            // Redireciona para a tela Pagamento
-            navigation.navigate('Pagamento');
+        setLoading(false);
+    }, []);
+
+    // 🚀 Lógica para alterar a quantidade
+    const handleQuantityChange = async (itemId, newQuantity, productName) => {
+        if (newQuantity <= 0) {
+            // Se a quantidade for 0, chama a função de remover para confirmar
+            handleRemoveItem(itemId, productName);
+            return;
+        }
+
+        const { error } = await updateItemQuantity(itemId, newQuantity);
+        
+        if (!error) {
+            // Atualiza o estado local para uma resposta mais rápida
+            setCartItems(prevItems => 
+                prevItems.map(item => 
+                    item.id === itemId ? { ...item, quantity: newQuantity } : item
+                )
+            );
+            // Atualiza o total
+        } else {
+            console.error("Erro ao atualizar quantidade:", error.message);
+            Alert.alert("Erro", "Não foi possível atualizar a quantidade.");
         }
     };
+    
+    // 🚀 Lógica para remover item
+    const handleRemoveItem = async (cartItemId, productName) => {
+        Alert.alert(
+            "Remover Item",
+            `Deseja realmente remover "${productName}" do carrinho?`,
+            [
+                { text: "Cancelar", style: "cancel" },
+                { 
+                    text: "Remover", 
+                    onPress: async () => {
+                        const { error } = await updateItemQuantity(cartItemId, 0); // Usa 0 para acionar o DELETE
+                        if (!error) {
+                            Alert.alert("Sucesso", "Item removido do carrinho.");
+                            fetchCart(); // Recarrega a lista
+                        } else {
+                            console.error("Erro ao remover:", error.message);
+                            Alert.alert("Erro", "Não foi possível remover o item.");
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
+    useEffect(() => {
+        if (isFocused) {
+            fetchCart();
+        }
+    }, [isFocused, fetchCart]);
+
+    const total = cartItems.reduce(
+        (sum, item) => sum + (item.quantity * item.price_unit), 
+        0
+    );
+
+    if (loading) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={MAIN_PINK} />
+                <Text style={{ marginTop: 10 }}>Carregando Carrinho...</Text>
+            </View>
+        );
+    }
 
     return (
-        <View style={styles.outerContainer}>
-            {/* Cabeçalho Limpo e Profissional */}
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
-                    <Ionicons name="arrow-back" size={24} color={TEXT_COLOR} />
-                </TouchableOpacity>
-                <Text style={styles.title}>Meu Carrinho ({cart.length})</Text> 
-                <TouchableOpacity onPress={() => { /* Opções do menu */ }} style={styles.headerButton}>
-                    <Ionicons name="ellipsis-vertical" size={24} color={TEXT_COLOR} />
-                </TouchableOpacity>
-            </View>
+        <View style={styles.container}>
+            <Text style={styles.headerTitle}>Seu Carrinho ({cartItems.length} {cartItems.length === 1 ? 'item' : 'itens'})</Text>
 
-            {/* ScrollView */}
-            <ScrollView 
-                style={styles.scrollViewContent} 
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 150 }} 
-            >
-                {/* Renderização dos Itens */}
-                {cart.length > 0 ? (
-                    cart.map((item) => (
-                        <CartItem key={item.id} item={item} />
-                    ))
-                ) : (
-                    <View style={styles.emptyCartContainer}>
-                        <Ionicons name="cart-outline" size={80} color={SECONDARY_TEXT_COLOR} />
-                        <Text style={styles.emptyCartText}>Seu carrinho está vazio.</Text>
-                        <Text style={styles.emptyCartSubText}>Adicione produtos para continuar a sua compra!</Text>
-                    </View>
-                )}
-                
-                {/* Resumo da Compra (Só mostra se houver itens) */}
-                {cart.length > 0 && (
-                    <View style={styles.summaryBox}>
-                        <Text style={styles.summaryTitle}>Resumo do Pedido</Text>
-                        
-                        <View style={styles.summaryRow}>
-                            <Text style={styles.summaryLabel}>Subtotal ({cart.length} {cart.length === 1 ? 'item' : 'itens'})</Text>
-                            <Text style={styles.summaryValue}>R$ {subtotal.toFixed(2)}</Text>
-                        </View>
-                        <View style={styles.summaryRow}>
-                            <Text style={styles.summaryLabel}>Frete</Text>
-                            <Text style={frete === 0 ? styles.summaryValueFree : styles.summaryValue}>
-                                {frete === 0 ? 'Grátis' : `R$ ${frete.toFixed(2)}`}
-                            </Text>
-                        </View>
-                        
-                        <View style={styles.divider} />
-                        
-                        <View style={[styles.summaryRow, {marginTop: 10}]}>
-                            <Text style={styles.totalLabel}>Total a Pagar</Text>
-                            <Text style={styles.totalValue}>R$ {total.toFixed(2)}</Text>
-                        </View>
-                    </View>
-                )}
-                
-                {/* Botão Finalizar Compra (Apenas se houver itens) */}
-                {cart.length > 0 && (
-                    <View style={styles.buttonContainerInsideScroll}>
-                        <TouchableOpacity 
-                            style={styles.checkoutButton} 
-                            onPress={handleCheckout} 
-                        >
-                            <Text style={styles.checkoutText}>FINALIZAR COMPRA</Text>
-                            <Ionicons name="arrow-forward-circle" size={24} color="#fff" style={{ marginLeft: 10 }} />
-                        </TouchableOpacity>
-                    </View>
-                )}
+            {cartItems.length === 0 ? (
+                <View style={styles.emptyContainer}>
+                    <Ionicons name="cart-outline" size={80} color="#ccc" />
+                    <Text style={styles.emptyText}>Seu carrinho está vazio.</Text>
+                    <TouchableOpacity 
+                        style={styles.continueShoppingButton}
+                        onPress={() => navigation.navigate('Home')}
+                    >
+                         <Text style={styles.continueShoppingText}>Continuar Comprando</Text>
+                    </TouchableOpacity>
+                </View>
+            ) : (
+                <FlatList
+                    data={cartItems}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => (
+                        <CartItemCard 
+                            item={item} 
+                            onRemoveItem={handleRemoveItem}
+                            onQuantityChange={handleQuantityChange}
+                        />
+                    )}
+                    contentContainerStyle={styles.listContent}
+                    // Adiciona um espaço no fim para o footer não esconder o último item
+                    ListFooterComponent={<View style={{ height: 100 }} />} 
+                />
+            )}
 
-            </ScrollView>
+            {/* O footer é fixo na parte inferior da tela, garantindo visibilidade */}
+            {cartItems.length > 0 && (
+                <View style={styles.footer}>
+                    <View style={styles.totalRow}>
+                        <Text style={styles.totalLabel}>Total a Pagar:</Text>
+                        <Text style={styles.totalValue}>R$ {total.toFixed(2).replace('.', ',')}</Text>
+                    </View>
+                    <TouchableOpacity style={styles.checkoutButton}>
+                        <Text style={styles.checkoutButtonText}>Finalizar Compra</Text>
+                        <Ionicons name="arrow-forward" size={20} color="#fff" style={{ marginLeft: 10 }} />
+                    </TouchableOpacity>
+                </View>
+            )}
         </View>
     );
 }
 
+// ================================
+// ESTILOS ATUALIZADOS
+// ================================
 const styles = StyleSheet.create({
-    outerContainer: {
+    container: {
         flex: 1,
-        backgroundColor: BACKGROUND_GREY,
-    },
-    scrollViewContent: {
-        paddingHorizontal: 20,
-        paddingTop: 10,
-    },
-    
-    // Header
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 20,
-        paddingTop: 50, 
-        paddingBottom: 15,
-        backgroundColor: '#fff', 
-        borderBottomWidth: 0, // Tiramos a borda para um look mais limpo
-    },
-    headerButton: {
-        padding: 5,
-    },
-    title: {
-        color: TEXT_COLOR,
-        fontWeight: '800',
-        fontSize: 20,
-    },
-
-    // ITENS DO CARRINHO (CARTÃO ELEGANTE)
-    itemCard: {
-        flexDirection: 'row',
         backgroundColor: '#fff',
-        borderRadius: 20,
-        padding: 15,
-        marginBottom: 15,
-        minHeight: 120,
-        
-        // Sombra suave, focada para cima e um pouco colorida
-        shadowColor: TEXT_COLOR,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05, 
-        shadowRadius: 5,
-        elevation: 3,
     },
-    imageContainer: {
-        width: 90,
-        height: 90,
+    headerTitle: {
+        fontSize: 24,
+        fontWeight: '900',
+        color: '#333',
+        paddingHorizontal: 20,
+        paddingTop: 50,
+        paddingBottom: 20,
+        backgroundColor: LIGHT_PINK,
+        borderBottomLeftRadius: 20,
+        borderBottomRightRadius: 20,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: -100, // Centraliza melhor na tela
+    },
+    emptyText: {
+        fontSize: 18,
+        color: '#999',
+        marginTop: 10,
+    },
+    continueShoppingButton: {
+        marginTop: 20,
+        backgroundColor: MAIN_PINK,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 20,
+    },
+    continueShoppingText: {
+        color: '#fff',
+        fontWeight: '700',
+    },
+    listContent: {
+        paddingHorizontal: 20,
+        paddingVertical: 15,
+    },
+    // NOVO ESTILO DO CARD
+    card: {
+        flexDirection: 'row',
+        backgroundColor: '#f9f9f9',
         borderRadius: 15,
-        marginRight: 15,
-        backgroundColor: SOFT_PINK, 
+        padding: 10,
+        marginBottom: 10,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#eee',
+    },
+    imageWrapper: {
+        width: 80,
+        height: 80,
+        borderRadius: 10,
+        backgroundColor: '#fff',
+        marginRight: 10,
         justifyContent: 'center',
         alignItems: 'center',
         overflow: 'hidden',
     },
-    itemImage: {
-        width: '90%', // Aumentamos um pouco o tamanho da imagem interna
-        height: '90%',
-        resizeMode: 'contain', 
+    productImage: {
+        width: '100%',
+        height: '100%',
     },
     itemDetails: {
         flex: 1,
-        justifyContent: 'space-around', 
-        paddingVertical: 2,
+        justifyContent: 'space-between',
     },
     itemName: {
-        fontWeight: '700',
-        fontSize: 16,
-        color: TEXT_COLOR,
-    },
-    itemDesc: {
-        fontSize: 12,
-        color: SECONDARY_TEXT_COLOR,
-        marginBottom: 4,
-    },
-    itemPriceUnit: {
-        fontWeight: '600',
-        color: SECONDARY_TEXT_COLOR,
-        fontSize: 13,
-    },
-    
-    // AÇÕES (Quantidade e Remover)
-    itemActions: {
-        width: 90,
-        justifyContent: 'space-between', 
-        alignItems: 'flex-end',
-    },
-    removeIcon: {
-        padding: 5,
-        // Alinha o ícone de remover ao topo/direita
-    },
-    qtyContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: SOFT_PINK, // Usamos o rosa suave para destacar o controle
-        borderRadius: 10,
-        overflow: 'hidden',
-        height: 35,
-        alignSelf: 'flex-end', 
-    },
-    qtyButton: {
-        width: 30,
-        height: 35,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    qtyNumber: {
-        fontSize: 15,
-        color: TEXT_COLOR, 
-        marginHorizontal: 4,
-        fontWeight: '700',
-    },
-
-    // RESUMO DA COMPRA
-    summaryBox: {
-        padding: 20,
-        backgroundColor: '#fff',
-        borderRadius: 20,
-        marginTop: 20,
-        shadowColor: PRIMARY_PINK,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1, // Sombra mais perceptível no resumo
-        shadowRadius: 10,
-        elevation: 5,
-    },
-    summaryTitle: {
-        fontSize: 18,
-        fontWeight: '800',
-        color: TEXT_COLOR,
-        marginBottom: 15,
-    },
-    summaryRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingVertical: 6,
-    },
-    summaryLabel: {
-        fontSize: 16,
-        color: SECONDARY_TEXT_COLOR,
-        fontWeight: '500',
-    },
-    summaryValue: {
         fontSize: 16,
         fontWeight: '700',
-        color: TEXT_COLOR,
-    },
-    summaryValueFree: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: '#34A853',
-    },
-    divider: {
-        height: 1.5, // Divisor mais grosso
-        backgroundColor: BORDER_COLOR,
-        marginVertical: 10,
-    },
-    totalLabel: {
-        fontSize: 22,
-        fontWeight: '800',
-        color: TEXT_COLOR,
-    },
-    totalValue: {
-        fontSize: 22,
-        fontWeight: '900',
-        color: PRIMARY_PINK, // O total é o mais destacado
-    },
-    
-    // BOTÃO FINALIZAR COMPRA
-    buttonContainerInsideScroll: {
-        paddingTop: 30,
-        paddingBottom: 20,
-        backgroundColor: 'transparent',
-    },
-    checkoutButton: {
-        backgroundColor: PRIMARY_PINK,
-        borderRadius: 15,
-        paddingVertical: 18,
-        alignItems: 'center',
-        flexDirection: 'row',
-        justifyContent: 'center',
-        
-        // Sombra de destaque para o CTA
-        shadowColor: PRIMARY_PINK,
-        shadowOpacity: 0.3,
-        shadowRadius: 15,
-        shadowOffset: { width: 0, height: 10 },
-        elevation: 10,
-    },
-    checkoutText: {
-        color: '#fff',
-        fontWeight: '900', // Mais peso
-        fontSize: 18, 
-        letterSpacing: 1, // Espaçamento para o efeito premium
-    },
-
-    // Carrinho Vazio
-    emptyCartContainer: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 50,
-        backgroundColor: '#fff',
-        borderRadius: 20,
-        marginTop: 40,
-        borderWidth: 1,
-        borderColor: BORDER_COLOR,
-    },
-    emptyCartText: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: TEXT_COLOR,
-        marginTop: 15,
+        color: '#333',
         marginBottom: 5,
     },
-    emptyCartSubText: {
-        fontSize: 14,
-        color: SECONDARY_TEXT_COLOR,
-        textAlign: 'center',
-    }
+    priceRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    itemUnit: {
+        fontSize: 12,
+        color: '#999',
+        marginRight: 10,
+    },
+    itemSubtotal: {
+        fontSize: 15,
+        fontWeight: '800',
+        color: MAIN_PINK,
+    },
+
+    quantityControlRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    counterBox: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: LIGHT_PINK,
+        borderRadius: 20,
+    },
+    counterButton: {
+        padding: 5,
+        width: 30,
+        height: 30,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    quantityText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#333',
+        paddingHorizontal: 5,
+    },
+    removeButton: {
+        padding: 8,
+        borderRadius: 50,
+        backgroundColor: LIGHT_PINK,
+    },
+
+    // ESTILOS DO FOOTER (FIXO)
+    footer: {
+        position: 'absolute', // Torna o footer fixo
+        bottom: 0,
+        left: 0,
+        right: 0,
+        borderTopWidth: 1,
+        borderTopColor: '#f0f0f0',
+        padding: 20,
+        paddingBottom: 30, // Garante que o botão não fique colado no fundo
+        backgroundColor: '#fff',
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: -5 },
+        shadowOpacity: 0.05,
+        shadowRadius: 5,
+        elevation: 10,
+    },
+    totalRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 15,
+    },
+    totalLabel: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#333',
+    },
+    totalValue: {
+        fontSize: 20,
+        fontWeight: '900',
+        color: MAIN_PINK,
+    },
+    checkoutButton: {
+        backgroundColor: MAIN_PINK,
+        borderRadius: 25,
+        paddingVertical: 15,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    checkoutButtonText: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: '700',
+    },
 });
