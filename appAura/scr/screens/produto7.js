@@ -23,7 +23,7 @@ const productData = {
     location: "2.8 Km de distância", 
     rating: 4.8,
     details: "Um gloss labial com textura não pegajosa e acabamento luxuoso de mel. Contém ingredientes hidratantes que nutrem os lábios, proporcionando um volume natural e um brilho espelhado. Perfeito para uso diário ou sobre batom. Há muitas variações de passagens de Lorem Ipsum disponíveis, mas a maioria sofreu alguma forma, por humor injetado ou palavras aleatórias que não parecem...", 
-    image: require('../assets/7.png'), 
+    image: require('../assets/cate_skin.png'), 
 };
 
 // Componente da Tela de Produto

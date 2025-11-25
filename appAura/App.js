@@ -135,22 +135,22 @@ export default function App() {
         <Stack.Screen 
           name="CategoriaCabelo" 
           component={CategoriaCabeloScreen} 
-          options={{ headerShown: true, title: 'Cabelo' }}
+   
         />
         <Stack.Screen 
           name="CategoriaPele" 
           component={CategoriaPeleScreen} 
-          options={{ headerShown: true, title: 'Pele' }}
+
         />
         <Stack.Screen 
           name="CategoriaMaquiagem" 
           component={CategoriaMaquiagemScreen} 
-          options={{ headerShown: true, title: 'Maquiagem' }}
+        
         />
         <Stack.Screen 
           name="CategoriaPerfume" 
           component={CategoriaPerfumeScreen} 
-          options={{ headerShown: true, title: 'Perfume' }}
+        
         />
         {/* =================================================== */}
 

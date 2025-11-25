@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { 
   View, Text, TextInput, TouchableOpacity, 
-  StyleSheet, Alert, ActivityIndicator, Dimensions, ScrollView, Image 
+  StyleSheet, Alert, ActivityIndicator, Dimensions, ScrollView 
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../screens/supabase'; // Importe conforme seu caminho
 import { Feather, Ionicons } from '@expo/vector-icons'; // Importação de ícones
 
 const { width } = Dimensions.get('window'); 
-const PRIMARY_COLOR_LIGHT = "#FFADD6"; 
-const PRIMARY_COLOR_DARK = "#fdcadeff"; 
-const LIGHT_BG = "#FDF6F8"; 
-const DARK_TEXT = "#333333";
-const GRAY_TEXT = "#707070";
-const RED_ALERT = "#FF4D4D";
+// Paleta de Cores Refinada:
+const PRIMARY_COLOR_LIGHT = "#FDEFF1"; // Rosa Claro
+const PRIMARY_COLOR_DARK = "#ff86b4"; // Rosa Escuro (Mais Profissional)
+const LIGHT_BG = "#F9FAFB"; // Fundo mais neutro e claro
+const DARK_TEXT = "#1F2937"; // Texto mais escuro e sólido
+const GRAY_TEXT = "#6B7280"; // Cinza para textos secundários
+const RED_ALERT = "#EF4444"; // Vermelho de alerta (logout)
 
 export default function ProfileScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
@@ -28,6 +29,11 @@ export default function ProfileScreen({ navigation }) {
   useEffect(() => {
     loadProfileData();
   }, []);
+
+  // Função para obter a primeira letra do nome
+  const getAvatarInitials = (name) => {
+    return name ? name.charAt(0).toUpperCase() : '?';
+  };
 
   async function loadProfileData() {
     setLoading(true);
@@ -63,8 +69,6 @@ export default function ProfileScreen({ navigation }) {
       setLoading(false);
     }
   }
-
-  // --- Funções de Atualização ---
 
   async function handleUpdateName() {
     if (!userName || !userId) return;
@@ -127,7 +131,6 @@ export default function ProfileScreen({ navigation }) {
     });
   }
 
-  // --- Funções de Navegação Adicionadas ---
   const navigateToNotifications = () => {
     navigation.navigate('Notificacoes'); 
   };
@@ -141,7 +144,12 @@ export default function ProfileScreen({ navigation }) {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+    // Reutilizando o ajuste de preenchimento para a tab navigation
+    <ScrollView 
+        style={styles.container} 
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false} // Adiciona um toque profissional
+    > 
       
       {/* HEADER PRINCIPAL COM BOTÃO DE NOTIFICAÇÕES */}
       <View style={styles.mainHeader}>
@@ -157,17 +165,22 @@ export default function ProfileScreen({ navigation }) {
 
       {/* CARTÃO DE INFORMAÇÕES DO USUÁRIO */}
       <View style={styles.userInfoCard}>
-        <Feather name="user" size={70} color={PRIMARY_COLOR_DARK} style={styles.avatar} />
+        {/* AVATAR COM INICIAIS */}
+        <View style={styles.avatar}>
+            <Text style={styles.avatarText}>
+                {getAvatarInitials(userName)}
+            </Text>
+        </View>
         <Text style={styles.userName}>{userName || 'Carregando Nome...'}</Text>
         <Text style={styles.userEmail}>{currentEmail}</Text>
       </View>
 
       {/* --- SEÇÃO DE ATUALIZAÇÃO DE NOME --- */}
       <View style={styles.sectionCard}>
-        <Text style={styles.sectionTitle}>Atualizar Dados Pessoais</Text>
+        <Text style={styles.sectionTitle}><Feather name="edit-3" size={16} color={PRIMARY_COLOR_DARK} /> Atualizar Dados Pessoais</Text>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Novo Nome</Text>
+          <Text style={styles.label}>Nome</Text>
           <TextInput
             style={styles.input}
             onChangeText={setUserName}
@@ -190,7 +203,7 @@ export default function ProfileScreen({ navigation }) {
 
       {/* --- SEÇÃO DE ALTERAÇÃO DE SENHA --- */}
       <View style={styles.sectionCard}>
-        <Text style={styles.sectionTitle}>Segurança (Alterar Senha)</Text>
+        <Text style={styles.sectionTitle}><Feather name="lock" size={16} color={PRIMARY_COLOR_DARK} /> Segurança (Alterar Senha)</Text>
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Nova Senha</Text>
@@ -245,7 +258,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 20,
-    // Ajuste MANDATÓRIO para a Tab Navigation
+    // Ajuste MANDATÓRIO para a Tab Navigation (mantido)
     paddingBottom: 100, 
   },
   mainHeader: {
@@ -256,51 +269,59 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   headerTitle: {
-    fontSize: 28,
-    fontWeight: '900',
+    fontSize: 30, // Aumentado
+    fontWeight: '800', // Levemente ajustado
     color: DARK_TEXT,
   },
   notificationButton: {
-    padding: 10,
-    borderRadius: 25,
+    padding: 8, // Ajustado
+    borderRadius: 20, 
     backgroundColor: '#fff',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 3,
+    shadowRadius: 3,
+    elevation: 4, // Aumentado
   },
   
   // Cartão de Informações do Usuário (Top)
   userInfoCard: {
-    backgroundColor: PRIMARY_COLOR_LIGHT + '40', // Um rosa bem suave de fundo
+    backgroundColor: '#fff', // Fundo branco mais limpo
     borderRadius: 20,
-    padding: 25,
+    padding: 30, // Aumentado
     alignItems: 'center',
     marginBottom: 30,
-    borderWidth: 1,
-    borderColor: PRIMARY_COLOR_DARK + '20',
+    // Sombra mais profunda e moderna
+    shadowColor: PRIMARY_COLOR_DARK,
+    shadowOffset: { width: 0, height: 8 }, 
+    shadowOpacity: 0.1,
+    shadowRadius: 15,
+    elevation: 10, 
   },
-  avatar: {
+  avatar: { // Novo estilo para o avatar de inicial
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: '#fff',
-    textAlign: 'center',
-    lineHeight: 100,
+    backgroundColor: PRIMARY_COLOR_LIGHT, // Fundo mais vibrante
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 15,
     borderWidth: 3,
     borderColor: PRIMARY_COLOR_DARK,
-    overflow: 'hidden', // Para garantir que o ícone fique contido
+  },
+  avatarText: { // Novo estilo para a inicial
+    fontSize: 48,
+    fontWeight: '900',
+    color: PRIMARY_COLOR_DARK,
   },
   userName: {
-    fontSize: 24,
-    fontWeight: '800',
+    fontSize: 26, // Aumentado
+    fontWeight: '900', // Mais ousado
     color: DARK_TEXT,
     marginBottom: 5,
   },
   userEmail: {
-    fontSize: 16,
+    fontSize: 15, // Levemente ajustado
     color: GRAY_TEXT,
   },
 
@@ -310,63 +331,73 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 20,
     marginBottom: 20,
-    shadowColor: PRIMARY_COLOR_DARK,
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
+    // Sombra sutil para um visual mais leve
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 2,
+    borderLeftWidth: 5, // Destaque na lateral
+    borderLeftColor: PRIMARY_COLOR_DARK,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 17, // Ajustado
     fontWeight: '700',
-    color: PRIMARY_COLOR_DARK,
+    color: DARK_TEXT, // Corrigido para texto escuro, mantendo o ícone colorido
     marginBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    paddingBottom: 10,
+    paddingBottom: 5,
   },
   inputContainer: { marginBottom: 15 },
-  label: { fontSize: 14, color: DARK_TEXT, fontWeight: '600', marginBottom: 5 },
+  label: { fontSize: 13, color: GRAY_TEXT, fontWeight: '600', marginBottom: 5 }, // Ajustado para ser menor e mais discreto
   input: {
     width: '100%',
-    height: 50,
-    backgroundColor: LIGHT_BG,
-    borderRadius: 10,
+    height: 48, // Ajustado
+    backgroundColor: LIGHT_BG, // Fundo do input mais claro
+    borderRadius: 8, // Ligeiramente menor
     paddingHorizontal: 15,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: '#D1D5DB', // Cor de borda mais suave
+    color: DARK_TEXT,
   },
   
   // Botões de Ação dentro das Seções
   actionButton: {
     marginTop: 5,
     backgroundColor: PRIMARY_COLOR_DARK,
-    paddingVertical: 12,
+    paddingVertical: 14, // Aumentado
     borderRadius: 10,
     alignItems: 'center',
+    shadowColor: PRIMARY_COLOR_DARK,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 6,
   },
   actionButtonText: { 
     color: '#fff', 
     fontSize: 16, 
-    fontWeight: '700' 
+    fontWeight: '800' // Mais ousado
   },
   disabledButton: {
     backgroundColor: GRAY_TEXT,
+    shadowOpacity: 0,
+    elevation: 0,
   },
 
   // Botão de Logout
   logoutButton: {
-    marginTop: 20,
+    marginTop: 30, // Mais espaçamento
     backgroundColor: RED_ALERT,
     paddingVertical: 15,
     borderRadius: 15,
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
+    // Sombra para destacar o alerta
     shadowColor: RED_ALERT,
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
     elevation: 8,
   },
   logoutButtonText: {
